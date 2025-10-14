@@ -92,6 +92,30 @@ body {
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 
+.action-btn.active-reporting {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+  animation: pulse-warning 2s infinite;
+}
+
+.action-btn.active-reporting:hover {
+  background: #fde68a;
+  border-color: #d97706;
+}
+
+@keyframes pulse-warning {
+  0%,
+  100% {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    border-color: #d97706;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+  }
+}
+
 .action-icon {
   font-size: 48px;
 }
@@ -225,4 +249,599 @@ body {
   .action-buttons {
     grid-template-columns: 1fr;
   }
+}
+
+/* Map Container & Controls */
+.map-container {
+  position: relative;
+}
+
+.map-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.map-control-btn {
+  background: white;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-control-btn:hover {
+  background: #f0f7ff;
+  transform: translateY(-1px);
+}
+
+.map-control-btn.active {
+  background: #2563eb;
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.routing-instructions {
+  padding: 12px 16px;
+  background: #dbeafe;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #1e40af;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.routing-instructions strong {
+  color: #1e40af;
+  font-weight: 700;
+}
+
+.reporting-instructions {
+  padding: 12px 16px;
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #92400e;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.reporting-instructions strong {
+  color: #92400e;
+  font-weight: 700;
+}
+
+.map-hint {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f0f7ff;
+  border-left: 4px solid #2563eb;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #1e40af;
+}
+
+.map-hint-warning {
+  margin-top: 12px;
+  padding: 12px;
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.map-hint-warning strong {
+  font-weight: 700;
+}
+
+/* Custom Marker Styles */
+.marker-pin {
+  width: 40px;
+  height: 40px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 3px solid white;
+}
+
+.marker-emoji {
+  transform: rotate(45deg);
+  font-size: 20px;
+}
+
+.route-marker-pin {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.route-marker-start {
+  background: #10b981;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Marker Popup */
+.marker-popup h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.marker-popup p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.popup-location {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.popup-btn {
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.popup-btn:hover {
+  background: #1e40af;
+}
+
+/* Map Legend */
+.map-legend {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.legend-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+.legend-items-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.legend-item-card {
+  padding: 10px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.legend-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.legend-items {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.legend-icon {
+  font-size: 20px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.legend-label {
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.legend-route-info {
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 12px;
+}
+
+.route-line {
+  width: 30px;
+  height: 4px;
+  background: linear-gradient(to right, #2563eb, #60a5fa);
+  border-radius: 2px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.modal-form {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-hint {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.route-preview {
+  background: #f0f9ff;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.route-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #1e40af;
+  margin-bottom: 4px;
+}
+
+.route-icon {
+  font-size: 20px;
+}
+
+.route-instruction {
+  background: #fffbeb;
+  border: 2px solid #f59e0b;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  color: #92400e;
+  font-size: 14px;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.category-card {
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.category-card:hover {
+  background: #f9fafb;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.category-card.selected {
+  background: #f0f9ff;
+  border-width: 3px;
+  font-weight: 600;
+}
+
+.category-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.category-name {
+  font-size: 13px;
+  color: #374151;
+}
+
+.category-card.selected .category-name {
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.category-line-preview {
+  width: 100%;
+  border-radius: 2px;
+}
+
+.route-marker-end {
+  background: #ef4444;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.user-reports-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.popup-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.popup-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.popup-status.verified {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.popup-time {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1e40af;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+/* Issues List */
+.issues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Leaflet Routing Machine Overrides */
+.leaflet-routing-container {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-routing-container.leaflet-bar {
+  display: none !important; /* Hide instruction panels for reported issues */
+}
+
+.leaflet-routing-alt {
+  padding: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.leaflet-routing-alt:last-child {
+  border-bottom: none;
+}
+
+/* Ensure temp routing controls are hidden */
+.leaflet-top.leaflet-right .leaflet-routing-container {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+/* Show only for main navigation routing */
+.leaflet-control-container
+  > .leaflet-top
+  > .leaflet-right
+  > .leaflet-routing-container:first-child {
+  opacity: 1;
+  pointer-events: all;
 }

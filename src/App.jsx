@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import Map from './components/Map'
+import IssueReportModal from './components/IssueReportModal'
+import IssuesList from './components/IssuesList'
+import MapLegend from './components/MapLegend'
+import { saveReport, getReports } from './utils/reportStorage'
 import './App.css'
 
 const ALERTS = [
@@ -30,6 +34,52 @@ const ALERTS = [
 
 function App() {
   const [language, setLanguage] = useState('English')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [showLegend, setShowLegend] = useState(false)
+  const [reportingMode, setReportingMode] = useState(false)
+  const [reportRoutePoints, setReportRoutePoints] = useState([])
+  const [reportCategory, setReportCategory] = useState('traffic')
+  const [refreshReports, setRefreshReports] = useState(0)
+
+  const handleStartReporting = () => {
+    setReportingMode(true)
+    setReportRoutePoints([])
+    // Don't open modal yet - wait for points to be selected
+    setIsModalOpen(false)
+  }
+
+  const handleIssueSubmit = (issueData) => {
+    console.log('New issue reported:', issueData)
+    saveReport(issueData)
+    setIsModalOpen(false)
+    setReportingMode(false)
+    setReportRoutePoints([])
+    setRefreshReports(prev => prev + 1)
+    alert('✓ Thank you! Your report has been submitted successfully.')
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setReportingMode(false)
+    setReportRoutePoints([])
+  }
+
+  const handleIssueClick = (issue) => {
+    console.log('Selected issue:', issue)
+    // Could show details in a modal or sidebar
+  }
+
+  const handleReportRouteSelect = (points) => {
+    setReportRoutePoints(points)
+    // Open modal once both points are selected
+    setIsModalOpen(true)
+  }
+
+  const handleCategoryChange = (category) => {
+    setReportCategory(category)
+  }
+
+  const userReports = getReports()
 
   return (
     <div className="app-container">
@@ -60,30 +110,56 @@ function App() {
 
       {/* Action Buttons */}
       <div className="action-buttons">
-        <button className="action-btn">
-          <span className="action-icon">📍</span>
-          <span>Live Traffic Updates</span>
+        <button className="action-btn" onClick={() => setShowLegend(!showLegend)}>
+          <span className="action-icon">📊</span>
+          <span>{showLegend ? 'Hide' : 'Show'} Legend</span>
         </button>
-        <button className="action-btn">
-          <span className="action-icon">⚠️</span>
-          <span>Report a Road Issue</span>
-        </button>
+        {!reportingMode ? (
+          <button className="action-btn" onClick={handleStartReporting}>
+            <span className="action-icon">⚠️</span>
+            <span>Report Road Issue</span>
+          </button>
+        ) : (
+          <button className="action-btn active-reporting" onClick={handleModalClose}>
+            <span className="action-icon">✕</span>
+            <span>Cancel Reporting</span>
+          </button>
+        )}
       </div>
 
       {/* Search and Map Section */}
       <div className="content-section">
-        <h2 className="section-title">Updates near K1</h2>
+        <h2 className="section-title">Updates near Kigali</h2>
         <div className="search-container">
           <input
             type="text"
-            placeholder="Search"
+            placeholder="Search for location or issue..."
             className="search-input"
           />
         </div>
-        <Map />
+
+        {showLegend && <MapLegend />}
+
+        <Map
+          onIssueSelect={handleIssueClick}
+          reportingMode={reportingMode}
+          onReportRouteSelect={handleReportRouteSelect}
+          reportCategory={reportCategory}
+          refreshReports={refreshReports}
+        />
+
+        {!reportingMode ? (
+          <div className="map-hint">
+            💡 Click "Get Directions" to find routes, or "Report Road Issue" to mark problematic road sections!
+          </div>
+        ) : (
+          <div className="map-hint-warning">
+            🎯 <strong>Reporting Mode Active:</strong> Click two points on the map to select the road section with the issue. Click "Cancel Reporting" to stop.
+          </div>
+        )}
       </div>
 
-      {/* Alerts Section */}
+      {/* Latest Alerts Section */}
       <div className="alerts-section">
         <h2 className="section-title">Latest Verified Alerts</h2>
         <div className="alerts-list">
@@ -99,6 +175,56 @@ function App() {
           ))}
         </div>
       </div>
+
+      {/* User Reported Issues */}
+      {userReports.length > 0 && (
+        <div className="alerts-section">
+          <h2 className="section-title">Your Reported Issues ({userReports.length})</h2>
+          <div className="user-reports-list">
+            {userReports.map(report => (
+              <div key={report.id} className={`alert-card alert-${report.type}`}>
+                <div className="alert-icon">
+                  {report.type ? (
+                    <>
+                      {report.type === 'traffic' && '🚗'}
+                      {report.type === 'accident' && '⚠️'}
+                      {report.type === 'pothole' && '🕳️'}
+                      {report.type === 'roadworks' && '🚧'}
+                      {report.type === 'closure' && '🚫'}
+                      {report.type === 'flooding' && '💧'}
+                      {report.type === 'debris' && '🪨'}
+                      {report.type === 'other' && '📍'}
+                    </>
+                  ) : '📍'}
+                </div>
+                <div className="alert-content">
+                  <div className="alert-title">{report.title}</div>
+                  {report.description && <div className="alert-subtitle">{report.description}</div>}
+                  <div className="alert-time">
+                    {new Date(report.timestamp).toLocaleString()} • {report.status}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* All Issues Section */}
+      <div className="alerts-section">
+        <h2 className="section-title">All Reported Issues</h2>
+        <IssuesList onIssueClick={handleIssueClick} />
+      </div>
+
+      {/* Issue Report Modal */}
+      <IssueReportModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onSubmit={handleIssueSubmit}
+        routePoints={reportRoutePoints}
+        onCategoryChange={handleCategoryChange}
+        selectedCategory={reportCategory}
+      />
     </div>
   )
 }
