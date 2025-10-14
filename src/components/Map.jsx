@@ -6,6 +6,7 @@ import 'leaflet-routing-machine'
 import { mockIssues } from '../data/mockIssues'
 import { issueCategories } from '../data/issueCategories'
 import { getReports } from '../utils/reportStorage'
+// import { useCurrentPosition } from '../hooks/useGeolocation'
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -29,9 +30,14 @@ function Map({
     const routeMarkersRef = useRef([])
     const reportLinesRef = useRef([])
     const previewLineRef = useRef(null)
+    const userLocationMarkerRef = useRef(null)
+    const streetLayerRef = useRef(null)
+    const satelliteLayerRef = useRef(null)
     const [routingMode, setRoutingMode] = useState(false)
     const [routePoints, setRoutePoints] = useState([])
     const [reportPoints, setReportPoints] = useState([])
+    const [isSatelliteView, setIsSatelliteView] = useState(false)
+    const [userLocation, setUserLocation] = useState(null)
 
     const addIssueMarkers = () => {
         if (!mapInstanceRef.current) return;
@@ -283,12 +289,19 @@ function Map({
         if (mapInstanceRef.current || !mapRef.current) return;
 
         // Center on Kigali, Rwanda
-        mapInstanceRef.current = L.map(mapRef.current).setView([-1.9441, 30.0619], 13);
+        mapInstanceRef.current = L.map(mapRef.current).setView([-1.9441, 30.0619], 100);
 
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // Street layer (OpenStreetMap)
+        streetLayerRef.current = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(mapInstanceRef.current);
+
+        // Satellite layer (Esri World Imagery)
+        satelliteLayerRef.current = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+        });
 
         // Add issue markers and reported issues
         addIssueMarkers();
@@ -451,6 +464,82 @@ function Map({
         setRoutingMode(false);
     }
 
+    const toggleSatelliteView = () => {
+        if (!mapInstanceRef.current || !streetLayerRef.current || !satelliteLayerRef.current) return;
+
+        if (isSatelliteView) {
+            // Switch to street view
+            mapInstanceRef.current.removeLayer(satelliteLayerRef.current);
+            mapInstanceRef.current.addLayer(streetLayerRef.current);
+            setIsSatelliteView(false);
+        } else {
+            // Switch to satellite view
+            mapInstanceRef.current.removeLayer(streetLayerRef.current);
+            mapInstanceRef.current.addLayer(satelliteLayerRef.current);
+            setIsSatelliteView(true);
+        }
+    }
+
+    const showUserLocation = () => {
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                const userPos = [latitude, longitude];
+
+                setUserLocation(userPos);
+
+                // Remove existing user location marker if any
+                if (userLocationMarkerRef.current) {
+                    userLocationMarkerRef.current.remove();
+                }
+
+                // Create custom icon for user location with pulsing effect
+                const userLocationIcon = L.divIcon({
+                    className: 'user-location-marker',
+                    html: `
+                        <div class="pulse-container">
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-dot"></div>
+                        </div>
+                    `,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+
+                // Add marker and center map
+                userLocationMarkerRef.current = L.marker(userPos, {
+                    icon: userLocationIcon,
+                    zIndexOffset: 1000
+                })
+                    .addTo(mapInstanceRef.current)
+                    .bindPopup('📍 Your Location');
+
+                // Zoom to user location
+                mapInstanceRef.current.setView(userPos, 15);
+            },
+            (error) => {
+                let errorMessage = 'Unable to retrieve your location';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = 'Location access denied. Please enable location permissions.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = 'Location information is unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = 'Location request timed out.';
+                        break;
+                }
+                alert(errorMessage);
+            }
+        );
+    }
+
     return (
         <div className="map-container">
             <div className="map-controls">
@@ -470,6 +559,20 @@ function Map({
                         ✕ Clear Route
                     </button>
                 )}
+                <button
+                    className="map-control-btn"
+                    onClick={showUserLocation}
+                    title="Show your current location"
+                >
+                    📍 My Location
+                </button>
+                <button
+                    className={`map-control-btn ${isSatelliteView ? 'active' : ''}`}
+                    onClick={toggleSatelliteView}
+                    title={isSatelliteView ? 'Switch to street view' : 'Switch to satellite view'}
+                >
+                    {isSatelliteView ? '🗺️ Street View' : '🛰️ Satellite'}
+                </button>
             </div>
             {routingMode && !reportingMode && (
                 <div className="routing-instructions">

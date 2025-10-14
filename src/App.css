@@ -845,3 +845,53 @@ body {
   opacity: 1;
   pointer-events: all;
 }
+
+/* User Location Marker with Pulsing Effect */
+.user-location-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.pulse-container {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse-dot {
+  width: 16px;
+  height: 16px;
+  background: #2563eb;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 0 0 2px #2563eb, 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.pulse-ring {
+  width: 30px;
+  height: 30px;
+  background: rgba(37, 99, 235, 0.3);
+  border-radius: 50%;
+  position: absolute;
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  z-index: 1;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
