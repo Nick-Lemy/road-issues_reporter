@@ -1,5 +1,6 @@
 import { mockIssues } from '../data/mockIssues'
 import { issueCategories } from '../data/issueCategories'
+import { getReports } from '../utils/reportStorage'
 
 export default function IssuesList({ onIssueClick }) {
     const getTimeAgo = (timestamp) => {
@@ -15,9 +16,13 @@ export default function IssuesList({ onIssueClick }) {
         return issueCategories.find(cat => cat.id === type) || issueCategories[issueCategories.length - 1]
     }
 
+    // Combine mock issues and user reports
+    const userReports = getReports()
+    const allIssues = [...mockIssues, ...userReports]
+
     return (
         <div className="issues-list">
-            {mockIssues.map(issue => {
+            {allIssues.map(issue => {
                 const category = getCategory(issue.type)
                 return (
                     <div
@@ -29,9 +34,11 @@ export default function IssuesList({ onIssueClick }) {
                         <div className="alert-icon">{category.icon}</div>
                         <div className="alert-content">
                             <div className="alert-title">{issue.title}</div>
-                            <div className="alert-subtitle">{issue.location.address}</div>
+                            <div className="alert-subtitle">
+                                {issue.location?.address || issue.description || 'Road section issue'}
+                            </div>
                             <div className="alert-time">
-                                {getTimeAgo(issue.timestamp)} • {issue.status === 'verified' ? '✓ Verified' : 'Pending'}
+                                {getTimeAgo(issue.timestamp)} • {issue.status === 'verified' ? '✓ Verified' : issue.status || 'Pending'}
                             </div>
                         </div>
                     </div>

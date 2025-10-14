@@ -40,6 +40,7 @@ function App() {
   const [reportRoutePoints, setReportRoutePoints] = useState([])
   const [reportCategory, setReportCategory] = useState('traffic')
   const [refreshReports, setRefreshReports] = useState(0)
+  const [focusedIssue, setFocusedIssue] = useState(null)
 
   const handleStartReporting = () => {
     setReportingMode(true)
@@ -66,7 +67,9 @@ function App() {
 
   const handleIssueClick = (issue) => {
     console.log('Selected issue:', issue)
-    // Could show details in a modal or sidebar
+    setFocusedIssue(issue)
+    // Scroll to map
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleReportRouteSelect = (points) => {
@@ -146,6 +149,7 @@ function App() {
           onReportRouteSelect={handleReportRouteSelect}
           reportCategory={reportCategory}
           refreshReports={refreshReports}
+          focusIssue={focusedIssue}
         />
 
         {!reportingMode ? (
@@ -182,7 +186,12 @@ function App() {
           <h2 className="section-title">Your Reported Issues ({userReports.length})</h2>
           <div className="user-reports-list">
             {userReports.map(report => (
-              <div key={report.id} className={`alert-card alert-${report.type}`}>
+              <div
+                key={report.id}
+                className={`alert-card alert-${report.type}`}
+                onClick={() => handleIssueClick(report)}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="alert-icon">
                   {report.type ? (
                     <>

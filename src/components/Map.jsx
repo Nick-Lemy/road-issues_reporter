@@ -21,7 +21,8 @@ function Map({
     reportingMode,
     onReportRouteSelect,
     reportCategory,
-    refreshReports
+    refreshReports,
+    focusIssue  // New prop to focus on a specific issue
 }) {
     const mapRef = useRef(null)
     const mapInstanceRef = useRef(null)
@@ -288,8 +289,8 @@ function Map({
     useEffect(() => {
         if (mapInstanceRef.current || !mapRef.current) return;
 
-        // Center on Kigali, Rwanda
-        mapInstanceRef.current = L.map(mapRef.current).setView([-1.9441, 30.0619], 100);
+        // Center on Kigali, Rwanda (default)
+        mapInstanceRef.current = L.map(mapRef.current).setView([-1.9441, 30.0619], 13);
 
         // Street layer (OpenStreetMap)
         streetLayerRef.current = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -302,6 +303,48 @@ function Map({
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
         });
+
+        // Try to get user location and center map on it
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    // Center map on user location
+                    mapInstanceRef.current.setView([latitude, longitude], 14);
+
+                    // Add user location marker
+                    const userLocationIcon = L.divIcon({
+                        className: 'user-location-marker',
+                        html: `
+                            <div class="pulse-container">
+                                <div class="pulse-ring"></div>
+                                <div class="pulse-dot"></div>
+                            </div>
+                        `,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    });
+
+                    userLocationMarkerRef.current = L.marker([latitude, longitude], {
+                        icon: userLocationIcon,
+                        zIndexOffset: 1000
+                    })
+                        .addTo(mapInstanceRef.current)
+                        .bindPopup('📍 Your Location');
+
+                    setUserLocation([latitude, longitude]);
+                },
+                (error) => {
+                    console.log('Could not get user location, using default (Kigali):', error);
+                    // Stay centered on Kigali if geolocation fails
+                },
+                {
+                    enableHighAccuracy: false,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        }
 
         // Add issue markers and reported issues
         addIssueMarkers();
@@ -349,6 +392,44 @@ function Map({
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reportCategory, reportPoints, reportingMode])
+
+    // Handle focusing on a specific issue when clicked from the list
+    useEffect(() => {
+        if (!mapInstanceRef.current || !focusIssue) return;
+
+        // Check if it's a mock issue (has location.lat/lng)
+        if (focusIssue.location && focusIssue.location.lat && focusIssue.location.lng) {
+            mapInstanceRef.current.setView([focusIssue.location.lat, focusIssue.location.lng], 17);
+
+            // Find and open the marker popup
+            markersRef.current.forEach(marker => {
+                const markerLatLng = marker.getLatLng();
+                if (markerLatLng.lat === focusIssue.location.lat && markerLatLng.lng === focusIssue.location.lng) {
+                    marker.openPopup();
+                }
+            });
+        }
+        // Check if it's a reported issue (has routePoints)
+        else if (focusIssue.routePoints && focusIssue.routePoints.length === 2) {
+            // Center on the midpoint of the route
+            const lat1 = focusIssue.routePoints[0].lat;
+            const lng1 = focusIssue.routePoints[0].lng;
+            const lat2 = focusIssue.routePoints[1].lat;
+            const lng2 = focusIssue.routePoints[1].lng;
+            const centerLat = (lat1 + lat2) / 2;
+            const centerLng = (lng1 + lng2) / 2;
+
+            mapInstanceRef.current.setView([centerLat, centerLng], 16);
+
+            // Find and open the polyline popup
+            reportLinesRef.current.forEach(line => {
+                // Open the popup at the center of the route
+                if (line.openPopup) {
+                    line.openPopup([centerLat, centerLng]);
+                }
+            });
+        }
+    }, [focusIssue])
 
     // Handle map clicks for navigation routing
     useEffect(() => {
