@@ -2,7 +2,7 @@ export const issueCategories = [
     {
         id: 'pothole',
         name: 'Pothole',
-        icon: '🕳️',
+        icon: 'Pickaxe',
         color: '#ef4444',
         lineStyle: {
             color: '#ef4444',
@@ -15,7 +15,7 @@ export const issueCategories = [
     {
         id: 'roadworks',
         name: 'Roadworks',
-        icon: '🚧',
+        icon: 'Construction',
         color: '#f59e0b',
         lineStyle: {
             color: '#f59e0b',
@@ -28,7 +28,7 @@ export const issueCategories = [
     {
         id: 'accident',
         name: 'Accident',
-        icon: '⚠️',
+        icon: 'AlertOctagon',
         color: '#dc2626',
         lineStyle: {
             color: '#dc2626',
@@ -41,7 +41,7 @@ export const issueCategories = [
     {
         id: 'closure',
         name: 'Road Closure',
-        icon: '🚫',
+        icon: 'Ban',
         color: '#b91c1c',
         lineStyle: {
             color: '#b91c1c',
@@ -53,7 +53,7 @@ export const issueCategories = [
     {
         id: 'flooding',
         name: 'Flooding',
-        icon: '💧',
+        icon: 'Droplet',
         color: '#3b82f6',
         lineStyle: {
             color: '#3b82f6',
@@ -66,7 +66,7 @@ export const issueCategories = [
     {
         id: 'debris',
         name: 'Debris on Road',
-        icon: '🪨',
+        icon: 'Blocks',
         color: '#78716c',
         lineStyle: {
             color: '#78716c',
@@ -79,7 +79,7 @@ export const issueCategories = [
     {
         id: 'traffic',
         name: 'Heavy Traffic / Jam',
-        icon: '🚗',
+        icon: 'Car',
         color: '#f97316',
         lineStyle: {
             color: '#f97316',
@@ -92,7 +92,7 @@ export const issueCategories = [
     {
         id: 'other',
         name: 'Other',
-        icon: '📍',
+        icon: 'MapPin',
         color: '#6b7280',
         lineStyle: {
             color: '#6b7280',

@@ -3,6 +3,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import 'leaflet-routing-machine'
+import { Navigation, X, MapPin, Satellite } from 'lucide-react'
 import { mockIssues } from '../data/mockIssues'
 import { issueCategories } from '../data/issueCategories'
 import { getReports } from '../utils/reportStorage'
@@ -630,14 +631,16 @@ function Map({
                     title="Click map to set start (A) and end (B) points"
                     disabled={reportingMode}
                 >
-                    {routingMode ? '🗺️ Click map for points' : '🧭 Get Directions'}
+                    <Navigation size={18} />
+                    <span>{routingMode ? 'Click map for points' : 'Get Directions'}</span>
                 </button>
                 {routingControlRef.current && (
                     <button
                         className="map-control-btn"
                         onClick={clearRoute}
                     >
-                        ✕ Clear Route
+                        <X size={18} />
+                        <span>Clear Route</span>
                     </button>
                 )}
                 <button
@@ -645,31 +648,33 @@ function Map({
                     onClick={showUserLocation}
                     title="Show your current location"
                 >
-                    📍 My Location
+                    <MapPin size={18} />
+                    <span>My Location</span>
                 </button>
                 <button
                     className={`map-control-btn ${isSatelliteView ? 'active' : ''}`}
                     onClick={toggleSatelliteView}
                     title={isSatelliteView ? 'Switch to street view' : 'Switch to satellite view'}
                 >
-                    {isSatelliteView ? '🗺️ Street View' : '🛰️ Satellite'}
+                    <Satellite size={18} />
+                    <span>{isSatelliteView ? 'Street View' : 'Satellite'}</span>
                 </button>
             </div>
             {routingMode && !reportingMode && (
                 <div className="routing-instructions">
                     {routePoints.length === 0 ? (
-                        <span>📍 Click on the map to set your <strong>starting point (A)</strong></span>
+                        <span><MapPin size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Click on the map to set your <strong>starting point (A)</strong></span>
                     ) : (
-                        <span>🎯 Now click on the map to set your <strong>destination (B)</strong></span>
+                        <span><Navigation size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Now click on the map to set your <strong>destination (B)</strong></span>
                     )}
                 </div>
             )}
             {reportingMode && (
                 <div className="reporting-instructions">
                     {reportPoints.length === 0 ? (
-                        <span>📍 Click where the road issue <strong>begins (Point A)</strong></span>
+                        <span><MapPin size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Click where the road issue <strong>begins (Point A)</strong></span>
                     ) : reportPoints.length === 1 ? (
-                        <span>🎯 Click where the road issue <strong>ends (Point B)</strong></span>
+                        <span><Navigation size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Click where the road issue <strong>ends (Point B)</strong></span>
                     ) : (
                         <span>✓ Road section selected! Choose issue type and fill the form</span>
                     )}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin } from 'lucide-react'
 import Map from './components/Map'
 import IssueReportModal from './components/IssueReportModal'
 import IssuesList from './components/IssuesList'
@@ -12,7 +13,7 @@ const ALERTS = [
     type: 'roadworks',
     title: 'Roadworks on KG 7 Ave — expect delays',
     time: '10 min ago',
-    icon: '🚧'
+    icon: 'Construction'
   },
   {
     id: 2,
@@ -20,7 +21,7 @@ const ALERTS = [
     title: 'Road closure at Gishushu',
     subtitle: 'for event until 3 PM',
     time: '30 min ago',
-    icon: '🚫'
+    icon: 'Ban'
   },
   {
     id: 3,
@@ -28,9 +29,32 @@ const ALERTS = [
     title: 'Accident on KN 3 Ave — alternate route',
     subtitle: 'recommended',
     time: '1 hr ago',
-    icon: '⚠️'
+    icon: 'AlertOctagon'
   }
 ]
+
+const getIconComponent = (iconName, size = 24) => {
+  const icons = {
+    Construction: <Construction size={size} />,
+    Ban: <Ban size={size} />,
+    AlertOctagon: <AlertOctagon size={size} />
+  }
+  return icons[iconName] || <AlertTriangle size={size} />
+}
+
+const getReportTypeIcon = (type, size = 24) => {
+  const icons = {
+    traffic: <Car size={size} />,
+    accident: <AlertOctagon size={size} />,
+    pothole: <Pickaxe size={size} />,
+    roadworks: <Construction size={size} />,
+    closure: <Ban size={size} />,
+    flooding: <Droplet size={size} />,
+    debris: <Blocks size={size} />,
+    other: <MapPin size={size} />
+  }
+  return icons[type] || <MapPin size={size} />
+}
 
 function App() {
   const [language, setLanguage] = useState('English')
@@ -114,17 +138,17 @@ function App() {
       {/* Action Buttons */}
       <div className="action-buttons">
         <button className="action-btn" onClick={() => setShowLegend(!showLegend)}>
-          <span className="action-icon">📊</span>
+          <BarChart3 size={24} className="action-icon" />
           <span>{showLegend ? 'Hide' : 'Show'} Legend</span>
         </button>
         {!reportingMode ? (
           <button className="action-btn" onClick={handleStartReporting}>
-            <span className="action-icon">⚠️</span>
+            <AlertTriangle size={24} className="action-icon" />
             <span>Report Road Issue</span>
           </button>
         ) : (
           <button className="action-btn active-reporting" onClick={handleModalClose}>
-            <span className="action-icon">✕</span>
+            <X size={24} className="action-icon" />
             <span>Cancel Reporting</span>
           </button>
         )}
@@ -154,11 +178,13 @@ function App() {
 
         {!reportingMode ? (
           <div className="map-hint">
-            💡 Click "Get Directions" to find routes, or "Report Road Issue" to mark problematic road sections!
+            <Lightbulb size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+            Click "Get Directions" to find routes, or "Report Road Issue" to mark problematic road sections!
           </div>
         ) : (
           <div className="map-hint-warning">
-            🎯 <strong>Reporting Mode Active:</strong> Click two points on the map to select the road section with the issue. Click "Cancel Reporting" to stop.
+            <Target size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+            <strong>Reporting Mode Active:</strong> Click two points on the map to select the road section with the issue. Click "Cancel Reporting" to stop.
           </div>
         )}
       </div>
@@ -169,7 +195,7 @@ function App() {
         <div className="alerts-list">
           {ALERTS.map(alert => (
             <div key={alert.id} className={`alert-card alert-${alert.type}`}>
-              <div className="alert-icon">{alert.icon}</div>
+              <div className="alert-icon">{getIconComponent(alert.icon, 32)}</div>
               <div className="alert-content">
                 <div className="alert-title">{alert.title}</div>
                 {alert.subtitle && <div className="alert-subtitle">{alert.subtitle}</div>}
@@ -193,18 +219,7 @@ function App() {
                 style={{ cursor: 'pointer' }}
               >
                 <div className="alert-icon">
-                  {report.type ? (
-                    <>
-                      {report.type === 'traffic' && '🚗'}
-                      {report.type === 'accident' && '⚠️'}
-                      {report.type === 'pothole' && '🕳️'}
-                      {report.type === 'roadworks' && '🚧'}
-                      {report.type === 'closure' && '🚫'}
-                      {report.type === 'flooding' && '💧'}
-                      {report.type === 'debris' && '🪨'}
-                      {report.type === 'other' && '📍'}
-                    </>
-                  ) : '📍'}
+                  {getReportTypeIcon(report.type, 32)}
                 </div>
                 <div className="alert-content">
                   <div className="alert-title">{report.title}</div>

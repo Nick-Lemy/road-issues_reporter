@@ -1,5 +1,20 @@
 import { useState, useEffect } from 'react'
+import { Route, Info, X, Car, AlertOctagon, Pickaxe, Construction, Ban, Droplet, Blocks, MapPin } from 'lucide-react'
 import { issueCategories } from '../data/issueCategories'
+
+const getIconComponent = (iconName, size = 20) => {
+    const icons = {
+        Car: <Car size={size} />,
+        AlertOctagon: <AlertOctagon size={size} />,
+        Pickaxe: <Pickaxe size={size} />,
+        Construction: <Construction size={size} />,
+        Ban: <Ban size={size} />,
+        Droplet: <Droplet size={size} />,
+        Blocks: <Blocks size={size} />,
+        MapPin: <MapPin size={size} />
+    }
+    return icons[iconName] || <MapPin size={size} />
+}
 
 export default function IssueReportModal({ isOpen, onClose, onSubmit, routePoints, onCategoryChange, selectedCategory }) {
     const [formData, setFormData] = useState({
@@ -60,14 +75,16 @@ export default function IssueReportModal({ isOpen, onClose, onSubmit, routePoint
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <h2 className="modal-title">Report Road Issue</h2>
-                    <button className="modal-close" onClick={onClose}>✕</button>
+                    <button className="modal-close" onClick={onClose}>
+                        <X size={20} />
+                    </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="modal-form">
                     {routePoints && routePoints.length === 2 ? (
                         <div className="route-preview">
                             <div className="route-preview-header">
-                                <span className="route-icon">🛣️</span>
+                                <Route size={20} className="route-icon" />
                                 <span>Road section selected</span>
                             </div>
                             <div className="route-preview-line" style={{
@@ -79,7 +96,8 @@ export default function IssueReportModal({ isOpen, onClose, onSubmit, routePoint
                         </div>
                     ) : (
                         <div className="route-instruction">
-                            ℹ️ Please select two points on the map to define the problematic road section
+                            <Info size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                            Please select two points on the map to define the problematic road section
                         </div>
                     )}
 
@@ -90,13 +108,15 @@ export default function IssueReportModal({ isOpen, onClose, onSubmit, routePoint
                                 <button
                                     key={cat.id}
                                     type="button"
-                                    className={`category-card ${formData.type === cat.id ? 'selected' : ''}`}
+                                    className={`category-card category-${cat.id} ${formData.type === cat.id ? 'selected' : ''}`}
                                     onClick={() => handleCategoryChange(cat.id)}
                                     style={{
                                         borderColor: formData.type === cat.id ? cat.color : '#e5e7eb'
                                     }}
                                 >
-                                    <span className="category-icon">{cat.icon}</span>
+                                    <span className="category-icon" style={{ color: cat.color }}>
+                                        {getIconComponent(cat.icon, 24)}
+                                    </span>
                                     <span className="category-name">{cat.name}</span>
                                     {formData.type === cat.id && (
                                         <div

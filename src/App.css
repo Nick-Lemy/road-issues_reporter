@@ -74,7 +74,7 @@ body {
 .action-btn {
   background: white;
   border: 2px solid #2563eb;
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -116,8 +116,15 @@ body {
   }
 }
 
-.action-icon {
-  font-size: 48px;
+
+/* Icon Styling */
+.action-btn svg {
+  color: #2563eb;
+  stroke-width: 2;
+}
+
+.action-btn.active-reporting svg {
+  color: #f59e0b;
 }
 
 /* Content Section */
@@ -156,7 +163,7 @@ body {
 /* Map */
 #map {
   height: 280px;
-  border-radius: 12px;
+  border-radius: 6px;
   overflow: hidden;
   border: 1px solid #e5e7eb;
 }
@@ -176,7 +183,7 @@ body {
   display: flex;
   gap: 16px;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 2px solid;
   background: white;
   transition: all 0.2s;
@@ -203,7 +210,6 @@ body {
 }
 
 .alert-icon {
-  font-size: 40px;
   flex-shrink: 0;
   width: 48px;
   height: 48px;
@@ -212,6 +218,43 @@ body {
   justify-content: center;
   background: white;
   border-radius: 50%;
+}
+
+.alert-icon svg {
+  stroke-width: 2;
+}
+
+/* Color icons based on alert type */
+.alert-roadworks .alert-icon svg {
+  color: #f59e0b;
+}
+
+.alert-closure .alert-icon svg {
+  color: #ef4444;
+}
+
+.alert-accident .alert-icon svg {
+  color: #f59e0b;
+}
+
+.alert-traffic .alert-icon svg {
+  color: #f97316;
+}
+
+.alert-pothole .alert-icon svg {
+  color: #ef4444;
+}
+
+.alert-flooding .alert-icon svg {
+  color: #3b82f6;
+}
+
+.alert-debris .alert-icon svg {
+  color: #78716c;
+}
+
+.alert-other .alert-icon svg {
+  color: #6b7280;
 }
 
 .alert-content {
@@ -266,7 +309,7 @@ body {
 .map-control-btn {
   background: white;
   border: 2px solid #2563eb;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 10px 16px;
   font-size: 14px;
   font-weight: 600;
@@ -289,6 +332,15 @@ body {
   animation: pulse 2s infinite;
 }
 
+.map-control-btn svg {
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.map-control-btn.active svg {
+  color: white;
+}
+
 @keyframes pulse {
   0%,
   100% {
@@ -309,6 +361,15 @@ body {
   color: #1e40af;
   text-align: center;
   animation: fadeIn 0.3s ease-in;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.routing-instructions svg {
+  color: #2563eb;
+  flex-shrink: 0;
 }
 
 @keyframes fadeIn {
@@ -337,6 +398,15 @@ body {
   color: #92400e;
   text-align: center;
   animation: fadeIn 0.3s ease-in;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.reporting-instructions svg {
+  color: #f59e0b;
+  flex-shrink: 0;
 }
 
 .reporting-instructions strong {
@@ -352,6 +422,14 @@ body {
   border-radius: 4px;
   font-size: 14px;
   color: #1e40af;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-hint svg {
+  color: #2563eb;
+  flex-shrink: 0;
 }
 
 .map-hint-warning {
@@ -362,6 +440,14 @@ body {
   border-radius: 4px;
   font-size: 14px;
   color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-hint-warning svg {
+  color: #f59e0b;
+  flex-shrink: 0;
 }
 
 .map-hint-warning strong {
@@ -452,7 +538,7 @@ body {
 .map-legend {
   background: white;
   border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 16px;
   margin-bottom: 16px;
 }
@@ -569,7 +655,6 @@ body {
 .modal-close {
   background: transparent;
   border: none;
-  font-size: 28px;
   cursor: pointer;
   color: #9ca3af;
   padding: 0;
@@ -580,6 +665,10 @@ body {
   justify-content: center;
   border-radius: 50%;
   transition: all 0.2s;
+}
+
+.modal-close svg {
+  stroke-width: 2;
 }
 
 .modal-close:hover {
@@ -651,18 +740,28 @@ body {
   margin-bottom: 4px;
 }
 
-.route-icon {
-  font-size: 20px;
+.route-preview-header svg {
+  color: #2563eb;
+  stroke-width: 2;
+  flex-shrink: 0;
 }
 
 .route-instruction {
   background: #fffbeb;
   border: 2px solid #f59e0b;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 12px;
   margin-bottom: 16px;
   color: #92400e;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.route-instruction svg {
+  color: #f59e0b;
+  flex-shrink: 0;
 }
 
 .category-grid {
@@ -697,8 +796,10 @@ body {
 }
 
 .category-icon {
-  font-size: 28px;
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .category-name {
