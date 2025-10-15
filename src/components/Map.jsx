@@ -310,12 +310,12 @@ function Map({
             console.log('🌍 Requesting geolocation...');
             console.log('📍 Protocol:', window.location.protocol);
             console.log('🔗 Hostname:', window.location.hostname);
-            
+
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     console.log('✅ Geolocation success:', position);
                     const { latitude, longitude, accuracy } = position.coords;
-                    
+
                     // Center map on user location
                     mapInstanceRef.current.setView([latitude, longitude], 14);
 
@@ -351,20 +351,20 @@ function Map({
                     console.error('❌ Geolocation error:', error);
                     console.error('Error code:', error.code);
                     console.error('Error message:', error.message);
-                    
+
                     // Detect device/browser type
                     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
                     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
                     const isSecure = window.location.protocol === 'https:';
-                    
+
                     let message = '';
                     let instruction = '';
-                    
+
                     if (error.code === 1) { // PERMISSION_DENIED
                         message = '📍 Location Access Denied';
-                        
+
                         if (isIOS || isSafari) {
-                            instruction = 
+                            instruction =
                                 '📱 For iOS/Safari:\n\n' +
                                 '1. Open Settings → Safari → Location\n' +
                                 '2. Change to "Ask" or "Allow"\n' +
@@ -372,7 +372,7 @@ function Map({
                                 '4. Tap "Allow" when prompted\n\n' +
                                 'Or use the "📍 My Location" button anytime!';
                         } else {
-                            instruction = 
+                            instruction =
                                 '🔒 Please enable location access:\n\n' +
                                 '1. Click the lock icon (🔒) in the address bar\n' +
                                 '2. Change Location to "Allow"\n' +
@@ -381,7 +381,7 @@ function Map({
                         }
                     } else if (error.code === 2) {
                         message = '📍 Location Unavailable';
-                        instruction = 
+                        instruction =
                             '⚠️ Your device location is unavailable:\n\n' +
                             '1. Enable Location Services in device settings\n' +
                             '2. Make sure you have GPS signal\n' +
@@ -389,13 +389,13 @@ function Map({
                             'Map will center on Kigali as fallback.';
                     } else if (error.code === 3) {
                         message = '📍 Location Request Timeout';
-                        instruction = 
+                        instruction =
                             '⏱️ The location request took too long.\n\n' +
                             'Please try the "📍 My Location" button to retry.';
                     }
-                    
+
                     console.warn('⚠️', message, '\n', instruction);
-                    
+
                     // Show user-friendly alert
                     if (!isSecure) {
                         alert(
@@ -410,7 +410,7 @@ function Map({
                             alert(message + '\n\n' + instruction);
                         }
                     }
-                    
+
                     // Map stays at Kigali as fallback
                 },
                 {
@@ -688,28 +688,28 @@ function Map({
 
                 // Zoom to user location
                 mapInstanceRef.current.setView(userPos, 15);
-                
+
                 console.log('✅ Centered map on user location');
             },
             (error) => {
                 console.error('❌ Location error:', error);
-                
+
                 // Detect device/browser
                 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
                 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
                 const isSecure = window.location.protocol === 'https:';
-                
+
                 let errorMessage = '📍 Unable to Get Your Location\n\n';
-                
+
                 if (error.code === 1) { // PERMISSION_DENIED
                     if (!isSecure) {
-                        errorMessage += 
+                        errorMessage +=
                             '⚠️ HTTPS Required:\n' +
                             'Location access requires a secure connection.\n\n' +
                             '✅ This will work on your deployed Netlify site!\n\n' +
                             'For local development, use HTTPS or test on deployment.';
                     } else if (isIOS || isSafari) {
-                        errorMessage += 
+                        errorMessage +=
                             '📱 iOS/Safari Instructions:\n\n' +
                             '1. Open Settings\n' +
                             '2. Go to Safari → Location\n' +
@@ -718,7 +718,7 @@ function Map({
                             '5. Tap "Allow" when prompted\n\n' +
                             'Then try "My Location" button again!';
                     } else {
-                        errorMessage += 
+                        errorMessage +=
                             '🔒 Permission Instructions:\n\n' +
                             '1. Click the lock icon (🔒) in your address bar\n' +
                             '2. Find "Location" permissions\n' +
@@ -727,24 +727,24 @@ function Map({
                             'Then try again!';
                     }
                 } else if (error.code === 2) {
-                    errorMessage += 
+                    errorMessage +=
                         '⚠️ Location Unavailable:\n\n' +
                         '• Enable Location Services in device settings\n' +
                         '• Make sure you have GPS signal\n' +
                         '• Try moving to an open area\n' +
                         '• Wait a moment and try again';
                 } else if (error.code === 3) {
-                    errorMessage += 
+                    errorMessage +=
                         '⏱️ Request Timeout:\n\n' +
                         'The location request took too long.\n\n' +
                         '• Check your GPS signal\n' +
                         '• Try again in a moment';
                 } else {
-                    errorMessage += 
+                    errorMessage +=
                         'An unknown error occurred.\n\n' +
                         'Please check your device settings and try again.';
                 }
-                
+
                 alert(errorMessage);
             },
             {
