@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin } from 'lucide-react'
 import Map from './components/Map'
+import SearchBar from './components/SearchBar'
+import { getFavorites, saveFavorite, deleteFavorite } from './utils/favoritesStorage'
 import IssueReportModal from './components/IssueReportModal'
 import IssuesList from './components/IssuesList'
 import MapLegend from './components/MapLegend'
@@ -65,6 +67,15 @@ function App() {
   const [reportCategory, setReportCategory] = useState('traffic')
   const [refreshReports, setRefreshReports] = useState(0)
   const [focusedIssue, setFocusedIssue] = useState(null)
+  const [selectedPlace, setSelectedPlace] = useState(null)
+  const [favorites, setFavorites] = useState(getFavorites())
+  const [latestRoute, setLatestRoute] = useState(null)
+
+  const handleRouteCreated = (route) => {
+    setLatestRoute(route)
+    // Reset selectedPlace so we can search for the same place again if needed
+    setSelectedPlace(null)
+  }
 
   const handleStartReporting = () => {
     setReportingMode(true)
@@ -158,11 +169,24 @@ function App() {
       <div className="content-section">
         <h2 className="section-title">Updates near Kigali</h2>
         <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search for location or issue..."
-            className="search-input"
-          />
+          <SearchBar onSelect={(place) => setSelectedPlace(place)} />
+          <div className="favorites-inline">
+            <button onClick={() => {
+              if (!latestRoute) return alert('Create a route first');
+              const favs = saveFavorite(latestRoute);
+              setFavorites(favs);
+              alert('Saved favorite');
+            }}>Save current route</button>
+            {favorites.map(f => (
+              <div key={f.id} className="fav-inline-item">
+                <button onClick={() => {
+                  // load into map by creating route
+                  setSelectedPlace({ lat: f.end.lat, lng: f.end.lng });
+                }}>{f.name || 'Favorite'}</button>
+                <button onClick={() => { const newF = deleteFavorite(f.id); setFavorites(newF); }}>Delete</button>
+              </div>
+            ))}
+          </div>
         </div>
 
         {showLegend && <MapLegend />}
@@ -174,6 +198,8 @@ function App() {
           reportCategory={reportCategory}
           refreshReports={refreshReports}
           focusIssue={focusedIssue}
+          selectedPlace={selectedPlace}
+          onRouteCreated={handleRouteCreated}
         />
 
         {!reportingMode ? (

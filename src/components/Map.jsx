@@ -1,9 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import 'leaflet-routing-machine'
 import { Navigation, X, MapPin, Satellite } from 'lucide-react'
+import { initialTrafficSegments, startTrafficSimulator } from '../data/mockTraffic'
+import { getFavorites } from '../utils/favoritesStorage'
+// Map accepts prop `selectedPlace` to navigate to, and `onRouteCreated` callback
+import { onReportsUpdated } from '../utils/reportStorage'
 import { mockIssues } from '../data/mockIssues'
 import { issueCategories } from '../data/issueCategories'
 import { getReports } from '../utils/reportStorage'
@@ -23,7 +27,9 @@ function Map({
     onReportRouteSelect,
     reportCategory,
     refreshReports,
-    focusIssue  // New prop to focus on a specific issue
+    focusIssue,  // New prop to focus on a specific issue
+    selectedPlace,
+    onRouteCreated
 }) {
     const mapRef = useRef(null)
     const mapInstanceRef = useRef(null)
@@ -40,6 +46,8 @@ function Map({
     const [reportPoints, setReportPoints] = useState([])
     const [isSatelliteView, setIsSatelliteView] = useState(false)
     const [userLocation, setUserLocation] = useState(null)
+    const [trafficSegments, setTrafficSegments] = useState(initialTrafficSegments)
+    const trafficLayerRef = useRef([])
 
     const addIssueMarkers = () => {
         if (!mapInstanceRef.current) return;
@@ -84,6 +92,33 @@ function Map({
             markersRef.current.push(marker);
         });
     }
+
+    // Render traffic segments
+    const renderTraffic = (segments) => {
+        if (!mapInstanceRef.current) return;
+
+        // Clear old
+        trafficLayerRef.current.forEach(t => t.remove && t.remove());
+        trafficLayerRef.current = [];
+
+        segments.forEach(seg => {
+            const color = seg.congestion === 'green' ? '#10b981' : seg.congestion === 'yellow' ? '#f59e0b' : '#ef4444';
+            const poly = L.polyline(seg.coords, {
+                color,
+                weight: 8,
+                opacity: 0.6
+            }).addTo(mapInstanceRef.current);
+
+            poly.bindPopup(`<strong>${seg.name}</strong><br/>Congestion: ${seg.congestion}`);
+            poly.on('click', () => {
+                // show incidents near this segment
+                alert(`${seg.name}\nCongestion: ${seg.congestion}`);
+            });
+
+            trafficLayerRef.current.push(poly);
+        });
+    }
+    // Map will respond to `selectedPlace` prop externally (App) to create routes
 
     const displayReportedIssues = () => {
         if (!mapInstanceRef.current) return;
@@ -241,7 +276,7 @@ function Map({
         );
     }
 
-    const createRoute = (start, end) => {
+    const createRoute = useCallback((start, end) => {
         if (!mapInstanceRef.current) return;
 
         // Remove existing routing control
@@ -284,7 +319,28 @@ function Map({
         }).addTo(mapInstanceRef.current);
 
         console.log('Route created from', start, 'to', end);
-    }
+        // Listen for routesfound once and report summary
+        routingControlRef.current.on('routesfound', function (e) {
+            try {
+                const route = e.routes[0];
+                const summary = route.summary || { totalDistance: route.summary?.totalDistance, totalTime: route.summary?.totalTime };
+                if (onRouteCreated) {
+                    onRouteCreated({ start, end, summary, distance: route.summary.totalDistance, time: route.summary.totalTime });
+                }
+            } catch (err) {
+                console.warn('Could not extract route summary', err);
+            }
+        });
+    }, [onRouteCreated]);
+
+    // If parent requested routing to a searched place, create route
+    useEffect(() => {
+        if (!selectedPlace) return;
+        const end = { lat: selectedPlace.lat, lng: selectedPlace.lng };
+        const start = userLocation ? { lat: userLocation[0], lng: userLocation[1] } : mapInstanceRef.current.getCenter();
+        createRoute(start, end);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedPlace]);
 
     // Initialize map
     useEffect(() => {
@@ -428,7 +484,22 @@ function Map({
         addIssueMarkers();
         displayReportedIssues();
 
+        // Start traffic simulator
+        const stopSim = startTrafficSimulator((segments) => {
+            setTrafficSegments(segments);
+            renderTraffic(segments);
+        }, 8000);
+
+        // Listen for report updates from other tabs
+        const stopListening = onReportsUpdated((updatedReports) => {
+            console.log('Reports updated via BroadcastChannel', updatedReports);
+            // Refresh displayed reported issues
+            displayReportedIssues();
+        });
+
         return () => {
+            stopSim && stopSim();
+            stopListening && stopListening();
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();
                 mapInstanceRef.current = null;
@@ -757,6 +828,7 @@ function Map({
 
     return (
         <div className="map-container">
+
             <div className="map-controls">
                 <button
                     className={`map-control-btn ${routingMode ? 'active' : ''}`}

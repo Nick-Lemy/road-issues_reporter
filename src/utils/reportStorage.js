@@ -1,4 +1,13 @@
 const STORAGE_KEY = 'road_reports';
+const CHANNEL_NAME = 'road_reports_channel';
+let bc = null;
+try {
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        bc = new BroadcastChannel(CHANNEL_NAME);
+    }
+} catch (e) {
+    console.warn('BroadcastChannel unavailable', e);
+}
 
 export const saveReport = (report) => {
     const reports = getReports();
@@ -10,6 +19,7 @@ export const saveReport = (report) => {
     };
     reports.push(newReport);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+    if (bc) bc.postMessage({ type: 'reports-updated', payload: reports });
     return newReport;
 };
 
@@ -27,10 +37,12 @@ export const deleteReport = (id) => {
     const reports = getReports();
     const filtered = reports.filter(report => report.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    if (bc) bc.postMessage({ type: 'reports-updated', payload: filtered });
 };
 
 export const clearAllReports = () => {
     localStorage.removeItem(STORAGE_KEY);
+    if (bc) bc.postMessage({ type: 'reports-updated', payload: [] });
 };
 
 export const updateReport = (id, updates) => {
@@ -39,4 +51,16 @@ export const updateReport = (id, updates) => {
         report.id === id ? { ...report, ...updates } : report
     );
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    if (bc) bc.postMessage({ type: 'reports-updated', payload: updated });
+};
+
+export const onReportsUpdated = (handler) => {
+    if (!bc) return () => { };
+    const listener = (ev) => {
+        if (ev && ev.data && ev.data.type === 'reports-updated') {
+            handler(ev.data.payload);
+        }
+    };
+    bc.addEventListener('message', listener);
+    return () => bc.removeEventListener('message', listener);
 };
