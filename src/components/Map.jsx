@@ -379,14 +379,14 @@ function Map({
                     if (routingContainer) {
                         // Find the route summary elements and enhance them
                         const routeAltElements = routingContainer.querySelectorAll('.leaflet-routing-alt');
-                        
+
                         routeAltElements.forEach((altElement, index) => {
                             const routeData = validRoutes[index] || allRoutes[index];
                             if (!routeData) return;
 
                             const routePenalty = routeData.penaltyMinutes || 0;
                             const routeBaseTime = routeData.baseTimeMinutes || (routeData.summary.totalTime / 60);
-                            
+
                             // Find the h3 element and add penalty info
                             const h3Element = altElement.querySelector('h3');
                             if (h3Element && routePenalty > 0) {
@@ -403,7 +403,7 @@ function Map({
                                 const issuesList = document.createElement('div');
                                 issuesList.className = 'route-issues-inline';
                                 issuesList.style.cssText = 'margin-top: 8px; padding: 8px; background: #fef3c7; border-radius: 6px; font-size: 12px;';
-                                
+
                                 let issuesHTML = '<strong style="color: #92400e; display: block; margin-bottom: 4px;">⚠️ Road Issues:</strong><ul style="margin: 0; padding-left: 20px; color: #78350f;">';
                                 routeData.affectedIssues.forEach(({ issue, penalty }) => {
                                     const category = issueCategories.find(c => c.id === issue.type);
