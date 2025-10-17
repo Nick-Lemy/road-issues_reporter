@@ -24,19 +24,16 @@ export default function SplashScreen({ onComplete }) {
         <div className="splash-screen">
             <div className="splash-content">
                 {/* Animated logo */}
-                <div className="splash-logo">
-                    <div className="logo-circle">
-                        <img
-                            src="/icons/icon-192x192.png"
-                            alt="Dryvupp Logo"
-                            className="app-logo-image"
-                        />
-                    </div>
-                </div>
+                <img
+                    style={{ width: 80 }}
+                    src="/icons/icon-192x192.png"
+                    alt="Dryvupp Logo"
+                    className="app-logo-image"
+                />
 
                 {/* App name */}
-                <h1 className="splash-title">Dryvupp</h1>
-                <p className="splash-subtitle">Kigali Road Reports</p>
+                <h1 style={{ fontSize: 22, paddingBottom: 5, color: '#0098a3' }}>Dryvupp</h1>
+                <p style={{ fontSize: 14, paddingBottom: 12, color: '#fd8121' }}>Kigali Road Reports</p>
 
                 {/* Loading bar */}
                 <div className="splash-loader">
