@@ -1721,6 +1721,76 @@ body {
   color: #78350f;
 }
 
+/* Route summary header in routing panel */
+.route-summary-header {
+  padding: 12px;
+  background: linear-gradient(135deg, #e6f7f8 0%, #b3e5ea 100%);
+  border-bottom: 3px solid #0098a3;
+  margin: -12px -12px 12px -12px;
+  border-radius: 12px 12px 0 0;
+}
+
+.route-summary-header > div:first-child {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #007580;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+/* Route penalty badge */
+.route-penalty-badge {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 8px;
+  border: 1px solid #fde68a;
+}
+
+/* Route issues inline in routing panel */
+.route-issues-inline {
+  margin-top: 10px;
+  padding: 10px;
+  background: #fef3c7;
+  border-radius: 8px;
+  border-left: 4px solid #fd8121;
+  font-size: 12px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.route-issues-inline strong {
+  color: #92400e;
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.route-issues-inline ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #78350f;
+}
+
+.route-issues-inline li {
+  margin-bottom: 3px;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .route-issues-warning li {
   margin: 4px 0;
 }

@@ -373,6 +373,68 @@ function Map({
                     issuesWarning += '</ul></div>';
                 }
 
+                // Update the routing panel with custom summary including penalties
+                setTimeout(() => {
+                    const routingContainer = document.querySelector('.routing-panel-visible');
+                    if (routingContainer) {
+                        // Find the route summary elements and enhance them
+                        const routeAltElements = routingContainer.querySelectorAll('.leaflet-routing-alt');
+                        
+                        routeAltElements.forEach((altElement, index) => {
+                            const routeData = validRoutes[index] || allRoutes[index];
+                            if (!routeData) return;
+
+                            const routePenalty = routeData.penaltyMinutes || 0;
+                            const routeBaseTime = routeData.baseTimeMinutes || (routeData.summary.totalTime / 60);
+                            
+                            // Find the h3 element and add penalty info
+                            const h3Element = altElement.querySelector('h3');
+                            if (h3Element && routePenalty > 0) {
+                                // Add penalty badge
+                                const penaltyBadge = document.createElement('span');
+                                penaltyBadge.className = 'route-penalty-badge';
+                                penaltyBadge.innerHTML = `⚠️ +${Math.round(routePenalty)} min`;
+                                penaltyBadge.style.cssText = 'background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-left: 8px;';
+                                h3Element.appendChild(penaltyBadge);
+                            }
+
+                            // Add issues list below the summary
+                            if (routeData.affectedIssues && routeData.affectedIssues.length > 0) {
+                                const issuesList = document.createElement('div');
+                                issuesList.className = 'route-issues-inline';
+                                issuesList.style.cssText = 'margin-top: 8px; padding: 8px; background: #fef3c7; border-radius: 6px; font-size: 12px;';
+                                
+                                let issuesHTML = '<strong style="color: #92400e; display: block; margin-bottom: 4px;">⚠️ Road Issues:</strong><ul style="margin: 0; padding-left: 20px; color: #78350f;">';
+                                routeData.affectedIssues.forEach(({ issue, penalty }) => {
+                                    const category = issueCategories.find(c => c.id === issue.type);
+                                    issuesHTML += `<li>${category?.name || issue.type} (+${penalty} min)</li>`;
+                                });
+                                issuesHTML += '</ul>';
+                                issuesList.innerHTML = issuesHTML;
+                                altElement.appendChild(issuesList);
+                            }
+                        });
+
+                        // Add a summary header showing best route info
+                        const existingSummary = routingContainer.querySelector('.route-summary-header');
+                        if (!existingSummary) {
+                            const summaryHeader = document.createElement('div');
+                            summaryHeader.className = 'route-summary-header';
+                            summaryHeader.style.cssText = 'padding: 12px; background: #e6f7f8; border-bottom: 2px solid #0098a3; margin-bottom: 12px; border-radius: 8px 8px 0 0;';
+                            summaryHeader.innerHTML = `
+                                <div style="font-size: 13px; color: #0098a3; font-weight: 600; margin-bottom: 4px;">🚗 RECOMMENDED ROUTE</div>
+                                <div style="font-size: 20px; font-weight: 700; color: #1f2937;">${timeString}</div>
+                                <div style="font-size: 14px; color: #6b7280; margin-top: 4px;">${distanceKm} km</div>
+                                ${penaltyMinutes > 0 ? `<div style="margin-top: 6px; padding: 6px 8px; background: #fef3c7; border-radius: 4px; font-size: 12px; color: #92400e; font-weight: 600;">⚠️ +${Math.round(penaltyMinutes)} min delay due to road issues</div>` : ''}
+                            `;
+                            const container = routingContainer.querySelector('.leaflet-routing-container');
+                            if (container && container.firstChild) {
+                                container.insertBefore(summaryHeader, container.firstChild);
+                            }
+                        }
+                    }
+                }, 600);
+
                 // Show blocked routes warning if any
                 let blockedWarning = '';
                 if (blockedRoutes.length > 0) {
