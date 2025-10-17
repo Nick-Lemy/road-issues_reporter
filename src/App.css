@@ -1576,6 +1576,50 @@ body {
   pointer-events: all;
 }
 
+/* Make routing panel always visible and prominent */
+.routing-panel-visible {
+  opacity: 1 !important;
+  pointer-events: all !important;
+  position: relative !important;
+  z-index: 1000 !important;
+  border: 2px solid #0098a3 !important;
+}
+
+.routing-panel-visible .leaflet-routing-container {
+  opacity: 1 !important;
+  pointer-events: all !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Ensure the time and distance span is very visible */
+.routing-panel-visible .leaflet-routing-alt span {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #0098a3 !important;
+  background: #e6f7f8;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: block !important;
+  margin-top: 8px !important;
+  border-left: 4px solid #0098a3;
+}
+
+/* Make route header more prominent */
+.routing-panel-visible .leaflet-routing-alt h3 {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.routing-panel-visible .leaflet-routing-alt h3::before {
+  content: "🚗";
+  font-size: 22px;
+}
+
 /* Google Maps-style Route Summary */
 .route-summary-custom {
   display: flex;

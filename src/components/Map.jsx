@@ -297,10 +297,11 @@ function Map({
             addWaypoints: false,
             fitSelectedRoutes: true,
             show: true, // Show the routing panel
-            collapsible: false, // Keep it expanded to show time
+            collapsible: true, // Make it collapsible
+            containerClassName: 'routing-panel-visible',
             lineOptions: {
                 styles: [
-                    { color: '#2563eb', opacity: 0.8, weight: 6 }
+                    { color: '#0098a3', opacity: 0.8, weight: 6 }
                 ]
             },
             altLineOptions: {
