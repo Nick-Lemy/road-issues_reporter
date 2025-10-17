@@ -355,7 +355,7 @@ function App() {
                 <div className="profile-avatar">
                   <MapPin size={48} />
                 </div>
-                <h3>Kigali User</h3>
+                <h3>Denise Izabayo</h3>
                 <p className="profile-subtitle">{t('navProfile', language)}</p>
               </div>
 
