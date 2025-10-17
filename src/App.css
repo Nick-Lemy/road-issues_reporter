@@ -975,22 +975,76 @@ body {
 /* Leaflet Routing Machine Overrides */
 .leaflet-routing-container {
   background: white;
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  max-width: 320px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif;
+}
+
+.leaflet-routing-container h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.leaflet-routing-container h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2563eb;
+  margin: 8px 0;
+}
+
+/* Time and distance display styling */
+.leaflet-routing-container .leaflet-routing-alt h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.leaflet-routing-container .leaflet-routing-alt span {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 .leaflet-routing-container.leaflet-bar {
-  display: none !important; /* Hide instruction panels for reported issues */
+  border: none;
+  padding: 16px;
+}
+
+/* Hide turn-by-turn instructions but show summary */
+.leaflet-routing-container table {
+  display: none;
 }
 
 .leaflet-routing-alt {
-  padding: 8px;
+  padding: 14px;
   border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 8px;
+  margin-bottom: 8px;
 }
 
 .leaflet-routing-alt:last-child {
   border-bottom: none;
+}
+
+.leaflet-routing-alt:hover {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Highlight selected route */
+.leaflet-routing-alt-minimized {
+  opacity: 0.6;
 }
 
 /* Ensure temp routing controls are hidden */
@@ -1007,6 +1061,99 @@ body {
   > .leaflet-routing-container:first-child {
   opacity: 1;
   pointer-events: all;
+}
+
+/* Google Maps-style Route Summary */
+.route-summary-custom {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.route-time {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.route-distance {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Route Info Popup (shown when clicking on route line) */
+.route-info-popup {
+  padding: 8px;
+  min-width: 250px;
+}
+
+.route-info-popup h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #2563eb;
+  padding-bottom: 8px;
+}
+
+.route-info-time,
+.route-info-distance {
+  padding: 8px 0;
+  font-size: 15px;
+  color: #374151;
+}
+
+.route-info-time strong,
+.route-info-distance strong {
+  color: #1f2937;
+  font-weight: 600;
+  display: inline-block;
+  min-width: 120px;
+}
+
+.route-info-time {
+  font-size: 16px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.route-info-note {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+  margin-bottom: 0;
+}
+
+/* Style the routing alternatives */
+.leaflet-routing-alt {
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.leaflet-routing-alt:hover {
+  background: #f9fafb;
+}
+
+.leaflet-routing-alt h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.leaflet-routing-alt span {
+  font-size: 13px;
+  color: #6b7280;
 }
 
 /* User Location Marker with Pulsing Effect */

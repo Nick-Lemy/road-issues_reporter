@@ -293,6 +293,10 @@ function Map({
             ],
             routeWhileDragging: true,
             showAlternatives: true,
+            addWaypoints: false,
+            fitSelectedRoutes: true,
+            show: true, // Show the routing panel
+            collapsible: false, // Keep it expanded to show time
             lineOptions: {
                 styles: [
                     { color: '#2563eb', opacity: 0.8, weight: 6 }
@@ -303,6 +307,12 @@ function Map({
                     { color: '#9ca3af', opacity: 0.6, weight: 4 }
                 ]
             },
+            // Custom formatter to show time and distance
+            formatter: new L.Routing.Formatter({
+                language: 'en',
+                units: 'metric',
+                roundingSensitivity: 1
+            }),
             createMarker: function (i, waypoint) {
                 const label = i === 0 ? 'A' : 'B';
                 const color = i === 0 ? '#10b981' : '#ef4444';
@@ -324,6 +334,49 @@ function Map({
             try {
                 const route = e.routes[0];
                 const summary = route.summary || { totalDistance: route.summary?.totalDistance, totalTime: route.summary?.totalTime };
+
+                // Calculate time in a readable format
+                const totalMinutes = Math.round(summary.totalTime / 60);
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                const timeString = hours > 0
+                    ? `${hours} hr ${minutes} min`
+                    : `${minutes} min`;
+
+                // Calculate distance in km
+                const distanceKm = (summary.totalDistance / 1000).toFixed(1);
+
+                // Add popup to the route line when clicked
+                const routeLine = route.coordinates;
+                if (routeLine && routeLine.length > 0) {
+                    // Find the route line that was added to the map
+                    setTimeout(() => {
+                        const routeLayers = [];
+                        mapInstanceRef.current.eachLayer((layer) => {
+                            if (layer instanceof L.Polyline && layer.options.color === '#2563eb') {
+                                routeLayers.push(layer);
+                            }
+                        });
+
+                        // Add popup to each route line
+                        routeLayers.forEach((layer) => {
+                            layer.bindPopup(`
+                                <div class="route-info-popup">
+                                    <h3>🚗 Route Information</h3>
+                                    <div class="route-info-time">
+                                        <strong>⏱️ Travel Time:</strong> ${timeString}
+                                    </div>
+                                    <div class="route-info-distance">
+                                        <strong>📏 Distance:</strong> ${distanceKm} km
+                                    </div>
+                                </div>
+                            `, {
+                                maxWidth: 300
+                            });
+                        });
+                    }, 500);
+                }
+
                 if (onRouteCreated) {
                     onRouteCreated({ start, end, summary, distance: route.summary.totalDistance, time: route.summary.totalTime });
                 }
@@ -627,6 +680,12 @@ function Map({
             // Handle navigation routing mode
             if (!routingMode) return;
 
+            // If route already exists, don't allow adding more points
+            if (routingControlRef.current) {
+                console.log('Route already exists. Clear it first to create a new route.');
+                return;
+            }
+
             console.log('Map clicked in routing mode:', e.latlng);
 
             const newPoints = [...routePoints, e.latlng];
@@ -652,6 +711,7 @@ function Map({
                 routeMarkersRef.current.forEach(marker => marker.remove());
                 routeMarkersRef.current = [];
 
+                // Disable routing mode after route is created
                 setRoutingMode(false);
                 setRoutePoints([]);
             }
@@ -667,6 +727,13 @@ function Map({
     }, [routingMode, routePoints, reportingMode, reportPoints, reportCategory, onReportRouteSelect])
 
     const toggleRoutingMode = () => {
+        // If route already exists, don't allow toggling routing mode
+        // User must clear the route first
+        if (routingControlRef.current) {
+            console.log('Route already exists. Use "Clear Route" button to remove it first.');
+            return;
+        }
+
         const newRoutingMode = !routingMode;
         console.log('Toggling routing mode:', newRoutingMode);
         setRoutingMode(newRoutingMode);
