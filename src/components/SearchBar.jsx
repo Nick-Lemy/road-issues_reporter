@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
+import { t } from '../utils/i18n'
 
 // Nominatim search with debounce and keyboard navigation
-export default function SearchBar({ onSelect }) {
+export default function SearchBar({ onSelect, language = 'English' }) {
     const [query, setQuery] = useState('')
     const [results, setResults] = useState([])
     const [loading, setLoading] = useState(false)
@@ -62,7 +63,7 @@ export default function SearchBar({ onSelect }) {
     }
 
     return (
-        <div className="search-bar">
+        <div className="search-bar" style={{ zIndex: 20 }}>
             <div className="search-input-wrap">
                 <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="11" cy="11" r="8" />
@@ -70,7 +71,7 @@ export default function SearchBar({ onSelect }) {
                 </svg>
                 <input
                     type="search"
-                    placeholder="Search places, streets or landmarks"
+                    placeholder={t('searchPlaceholder', language)}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     aria-label="Search places"
@@ -81,7 +82,10 @@ export default function SearchBar({ onSelect }) {
             </div>
 
             <div className="search-results">
-                {loading && <div className="loading">Searching…</div>}
+                {loading && <div className="loading">{t('searching', language)}</div>}
+                {!loading && results.length === 0 && query.length >= 2 && (
+                    <div className="no-results">{t('searchNoResults', language)}</div>
+                )}
                 {results.map((r, idx) => (
                     <div
                         key={r.place_id}

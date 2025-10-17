@@ -1,12 +1,15 @@
-import { useState } from 'react'
-import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin, Globe } from 'lucide-react'
 import Map from './components/Map'
 import SearchBar from './components/SearchBar'
+import SplashScreen from './components/SplashScreen'
+import BottomNav from './components/BottomNav'
 import { getFavorites, saveFavorite, deleteFavorite } from './utils/favoritesStorage'
 import IssueReportModal from './components/IssueReportModal'
 import IssuesList from './components/IssuesList'
 import MapLegend from './components/MapLegend'
 import { saveReport, getReports } from './utils/reportStorage'
+import { t } from './utils/i18n'
 import './App.css'
 
 const ALERTS = [
@@ -59,7 +62,10 @@ const getReportTypeIcon = (type, size = 24) => {
 }
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true)
+  const [activeTab, setActiveTab] = useState('home')
   const [language, setLanguage] = useState('English')
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [showLegend, setShowLegend] = useState(false)
   const [reportingMode, setReportingMode] = useState(false)
@@ -70,6 +76,15 @@ function App() {
   const [selectedPlace, setSelectedPlace] = useState(null)
   const [favorites, setFavorites] = useState(getFavorites())
   const [latestRoute, setLatestRoute] = useState(null)
+
+  // Handle tab changes
+  useEffect(() => {
+    if (activeTab === 'report' && !reportingMode) {
+      handleStartReporting()
+    } else if (reportingMode && activeTab !== 'report') {
+      handleModalClose()
+    }
+  }, [activeTab, reportingMode])
 
   const handleRouteCreated = (route) => {
     setLatestRoute(route)
@@ -91,13 +106,15 @@ function App() {
     setReportingMode(false)
     setReportRoutePoints([])
     setRefreshReports(prev => prev + 1)
-    alert('✓ Thank you! Your report has been submitted successfully.')
+    setActiveTab('home')
+    alert(t('reportSuccess', language))
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
     setReportingMode(false)
     setReportRoutePoints([])
+    setActiveTab('home')
   }
 
   const handleIssueClick = (issue) => {
@@ -119,152 +136,265 @@ function App() {
 
   const userReports = getReports()
 
+  // Show splash screen on first load
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />
+  }
+
   return (
     <div className="app-container">
-      {/* Header */}
-      <header className="header">
-        <h1 className="header-title">Kigali Real-Time Road Info</h1>
-        <div className="language-selector">
+      {/* Mobile Header */}
+      <header className="mobile-header">
+        <div className="header-logo-container">
+          <img
+            src="/icons/icon-96x96.png"
+            alt="Dryvupp Logo"
+            className="header-logo"
+          />
+          <h1 className="mobile-header-title">{t('appTitle', language)}</h1>
+        </div>
+        <button
+          className="language-btn"
+          onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+        >
+          <Globe size={24} />
+        </button>
+      </header>
+
+      {/* Language Menu Dropdown */}
+      {showLanguageMenu && (
+        <div className="language-menu">
           <button
-            className={language === 'English' ? 'lang-active' : ''}
-            onClick={() => setLanguage('English')}
+            className={`language-menu-item ${language === 'English' ? 'active' : ''}`}
+            onClick={() => {
+              setLanguage('English')
+              setShowLanguageMenu(false)
+            }}
           >
             English
           </button>
           <button
-            className={language === 'Kinyarwanda' ? 'lang-active' : ''}
-            onClick={() => setLanguage('Kinyarwanda')}
+            className={`language-menu-item ${language === 'Kinyarwanda' ? 'active' : ''}`}
+            onClick={() => {
+              setLanguage('Kinyarwanda')
+              setShowLanguageMenu(false)
+            }}
           >
             Kinyarwanda
           </button>
           <button
-            className={language === 'French' ? 'lang-active' : ''}
-            onClick={() => setLanguage('French')}
+            className={`language-menu-item ${language === 'French' ? 'active' : ''}`}
+            onClick={() => {
+              setLanguage('French')
+              setShowLanguageMenu(false)
+            }}
           >
-            French
+            Français
           </button>
-        </div>
-      </header>
-
-      {/* Action Buttons */}
-      <div className="action-buttons">
-        <button className="action-btn" onClick={() => setShowLegend(!showLegend)}>
-          <BarChart3 size={24} className="action-icon" />
-          <span>{showLegend ? 'Hide' : 'Show'} Legend</span>
-        </button>
-        {!reportingMode ? (
-          <button className="action-btn" onClick={handleStartReporting}>
-            <AlertTriangle size={24} className="action-icon" />
-            <span>Report Road Issue</span>
-          </button>
-        ) : (
-          <button className="action-btn active-reporting" onClick={handleModalClose}>
-            <X size={24} className="action-icon" />
-            <span>Cancel Reporting</span>
-          </button>
-        )}
-      </div>
-
-      {/* Search and Map Section */}
-      <div className="content-section">
-        <h2 className="section-title">Updates near Kigali</h2>
-        <div className="search-container">
-          <SearchBar onSelect={(place) => setSelectedPlace(place)} />
-          <div className="favorites-inline">
-            <button onClick={() => {
-              if (!latestRoute) return alert('Create a route first');
-              const favs = saveFavorite(latestRoute);
-              setFavorites(favs);
-              alert('Saved favorite');
-            }}>Save current route</button>
-            {favorites.map(f => (
-              <div key={f.id} className="fav-inline-item">
-                <button onClick={() => {
-                  // load into map by creating route
-                  setSelectedPlace({ lat: f.end.lat, lng: f.end.lng });
-                }}>{f.name || 'Favorite'}</button>
-                <button onClick={() => { const newF = deleteFavorite(f.id); setFavorites(newF); }}>Delete</button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {showLegend && <MapLegend />}
-
-        <Map
-          onIssueSelect={handleIssueClick}
-          reportingMode={reportingMode}
-          onReportRouteSelect={handleReportRouteSelect}
-          reportCategory={reportCategory}
-          refreshReports={refreshReports}
-          focusIssue={focusedIssue}
-          selectedPlace={selectedPlace}
-          onRouteCreated={handleRouteCreated}
-        />
-
-        {!reportingMode ? (
-          <div className="map-hint">
-            <Lightbulb size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
-            Click "Get Directions" to find routes, or "Report Road Issue" to mark problematic road sections!
-          </div>
-        ) : (
-          <div className="map-hint-warning">
-            <Target size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
-            <strong>Reporting Mode Active:</strong> Click two points on the map to select the road section with the issue. Click "Cancel Reporting" to stop.
-          </div>
-        )}
-      </div>
-
-      {/* Latest Alerts Section */}
-      <div className="alerts-section">
-        <h2 className="section-title">Latest Verified Alerts</h2>
-        <div className="alerts-list">
-          {ALERTS.map(alert => (
-            <div key={alert.id} className={`alert-card alert-${alert.type}`}>
-              <div className="alert-icon">{getIconComponent(alert.icon, 32)}</div>
-              <div className="alert-content">
-                <div className="alert-title">{alert.title}</div>
-                {alert.subtitle && <div className="alert-subtitle">{alert.subtitle}</div>}
-                <div className="alert-time">{alert.time}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* User Reported Issues */}
-      {userReports.length > 0 && (
-        <div className="alerts-section">
-          <h2 className="section-title">Your Reported Issues ({userReports.length})</h2>
-          <div className="user-reports-list">
-            {userReports.map(report => (
-              <div
-                key={report.id}
-                className={`alert-card alert-${report.type}`}
-                onClick={() => handleIssueClick(report)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="alert-icon">
-                  {getReportTypeIcon(report.type, 32)}
-                </div>
-                <div className="alert-content">
-                  <div className="alert-title">{report.title}</div>
-                  {report.description && <div className="alert-subtitle">{report.description}</div>}
-                  <div className="alert-time">
-                    {new Date(report.timestamp).toLocaleString()} • {report.status}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
-      {/* All Issues Section */}
-      <div className="alerts-section">
-        <h2 className="section-title">All Reported Issues</h2>
-        <IssuesList onIssueClick={handleIssueClick} />
+      {/* Main Content - Tab Based */}
+      <div className="main-content">
+
+        {/* HOME TAB */}
+        {activeTab === 'home' && (
+          <>
+            {/* Search and Map Section */}
+            <div className="content-section" style={{ paddingTop: 12 }}>
+              <h2 className="section-title">{t('updatesNear', language)}</h2>
+              <div className="search-container">
+                <SearchBar
+                  onSelect={(place) => setSelectedPlace(place)}
+                  language={language}
+                />
+                <div className="favorites-inline">
+                  <button onClick={() => {
+                    if (!latestRoute) return alert(t('createRouteFirst', language));
+                    const favs = saveFavorite(latestRoute);
+                    setFavorites(favs);
+                    alert(t('savedFavorite', language));
+                  }}>{t('saveFavorite', language)}</button>
+                  {favorites.map(f => (
+                    <div key={f.id} className="fav-inline-item">
+                      <button onClick={() => {
+                        setSelectedPlace({ lat: f.end.lat, lng: f.end.lng });
+                      }}>{f.name || t('favorite', language)}</button>
+                      <button onClick={() => {
+                        const newF = deleteFavorite(f.id);
+                        setFavorites(newF);
+                      }}>{t('deleteFavorite', language)}</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="legend-toggle">
+                <button
+                  className="legend-toggle-btn"
+                  onClick={() => setShowLegend(!showLegend)}
+                >
+                  <BarChart3 size={20} />
+                  <span>{showLegend ? t('hideLegend', language) : t('showLegend', language)}</span>
+                </button>
+              </div>
+
+              {showLegend && <MapLegend language={language} />}
+
+              <Map
+                onIssueSelect={handleIssueClick}
+                reportingMode={reportingMode}
+                onReportRouteSelect={handleReportRouteSelect}
+                reportCategory={reportCategory}
+                refreshReports={refreshReports}
+                focusIssue={focusedIssue}
+                selectedPlace={selectedPlace}
+                onRouteCreated={handleRouteCreated}
+              />
+
+              {!reportingMode ? (
+                <div className="map-hint">
+                  <Lightbulb size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                  {t('mapHint', language)}
+                </div>
+              ) : (
+                <div className="map-hint-warning">
+                  <Target size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                  <strong>{t('reportingHint', language)}</strong>
+                </div>
+              )}
+            </div>
+
+            {/* Latest Alerts Section */}
+            <div className="alerts-section">
+              <h2 className="section-title">{t('latestAlerts', language)}</h2>
+              <div className="alerts-list">
+                {ALERTS.map(alert => (
+                  <div key={alert.id} className={`alert-card alert-${alert.type}`}>
+                    <div className="alert-icon">{getIconComponent(alert.icon, 32)}</div>
+                    <div className="alert-content">
+                      <div className="alert-title">{alert.title}</div>
+                      {alert.subtitle && <div className="alert-subtitle">{alert.subtitle}</div>}
+                      <div className="alert-time">{alert.time}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* REPORT TAB */}
+        {activeTab === 'report' && (
+          <div className="tab-content">
+            <div className="report-instructions">
+              <div className="instruction-card">
+                <Target size={48} className="instruction-icon" />
+                <h3>{t('reportIssue', language)}</h3>
+                <p>{t('reportingHint', language)}</p>
+              </div>
+            </div>
+
+            <Map
+              onIssueSelect={handleIssueClick}
+              reportingMode={true}
+              onReportRouteSelect={handleReportRouteSelect}
+              reportCategory={reportCategory}
+              refreshReports={refreshReports}
+              focusIssue={focusedIssue}
+              selectedPlace={selectedPlace}
+              onRouteCreated={handleRouteCreated}
+            />
+
+            {/* User Reported Issues */}
+            {userReports.length > 0 && (
+              <div className="alerts-section">
+                <h2 className="section-title">{t('yourReports', language)} ({userReports.length})</h2>
+                <div className="user-reports-list">
+                  {userReports.map(report => (
+                    <div
+                      key={report.id}
+                      className={`alert-card alert-${report.type}`}
+                      onClick={() => handleIssueClick(report)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="alert-icon">
+                        {getReportTypeIcon(report.type, 32)}
+                      </div>
+                      <div className="alert-content">
+                        <div className="alert-title">{report.title}</div>
+                        {report.description && <div className="alert-subtitle">{report.description}</div>}
+                        <div className="alert-time">
+                          {new Date(report.timestamp).toLocaleString()} • {report.status}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ISSUES TAB */}
+        {activeTab === 'issues' && (
+          <div className="tab-content">
+            <div className="alerts-section">
+              <h2 className="section-title">{t('allIssues', language)}</h2>
+              <IssuesList onIssueClick={handleIssueClick} />
+            </div>
+          </div>
+        )}
+
+        {/* PROFILE TAB */}
+        {activeTab === 'profile' && (
+          <div className="tab-content">
+            <div className="profile-section">
+              <div className="profile-card">
+                <div className="profile-avatar">
+                  <MapPin size={48} />
+                </div>
+                <h3>Kigali User</h3>
+                <p className="profile-subtitle">{t('navProfile', language)}</p>
+              </div>
+
+              <div className="stats-grid">
+                <div className="stat-card">
+                  <div className="stat-number">{userReports.length}</div>
+                  <div className="stat-label">{t('yourReports', language)}</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-number">{favorites.length}</div>
+                  <div className="stat-label">{t('favorite', language)}</div>
+                </div>
+              </div>
+
+              <div className="settings-section">
+                <h3 className="section-title">Settings</h3>
+                <div className="setting-item">
+                  <span>Language</span>
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    className="language-select"
+                  >
+                    <option value="English">English</option>
+                    <option value="Kinyarwanda">Kinyarwanda</option>
+                    <option value="French">Français</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNav
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        language={language}
+      />
 
       {/* Issue Report Modal */}
       <IssueReportModal
