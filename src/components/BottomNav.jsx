@@ -10,7 +10,7 @@ export default function BottomNav({ activeTab, onTabChange, language }) {
     ]
 
     return (
-        <nav className="bottom-nav">
+        <nav style={{ zIndex: 40 }} className="bottom-nav">
             {tabs.map(tab => {
                 const Icon = tab.icon
                 return (

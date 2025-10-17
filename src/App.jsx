@@ -294,17 +294,18 @@ function App() {
                 <p>{t('reportingHint', language)}</p>
               </div>
             </div>
-
-            <Map
-              onIssueSelect={handleIssueClick}
-              reportingMode={true}
-              onReportRouteSelect={handleReportRouteSelect}
-              reportCategory={reportCategory}
-              refreshReports={refreshReports}
-              focusIssue={focusedIssue}
-              selectedPlace={selectedPlace}
-              onRouteCreated={handleRouteCreated}
-            />
+            <div style={{ paddingInline: 16, paddingBottom: 16 }}>
+              <Map
+                onIssueSelect={handleIssueClick}
+                reportingMode={true}
+                onReportRouteSelect={handleReportRouteSelect}
+                reportCategory={reportCategory}
+                refreshReports={refreshReports}
+                focusIssue={focusedIssue}
+                selectedPlace={selectedPlace}
+                onRouteCreated={handleRouteCreated}
+              />
+            </ div>
 
             {/* User Reported Issues */}
             {userReports.length > 0 && (
