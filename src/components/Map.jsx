@@ -3,7 +3,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import 'leaflet-routing-machine'
-import { Navigation, X, MapPin, Satellite } from 'lucide-react'
+import { Navigation, X, MapPin, Satellite, AlertTriangle } from 'lucide-react'
 import { initialTrafficSegments, startTrafficSimulator } from '../data/mockTraffic'
 import { getFavorites } from '../utils/favoritesStorage'
 // Map accepts prop `selectedPlace` to navigate to, and `onRouteCreated` callback
@@ -11,6 +11,7 @@ import { onReportsUpdated } from '../utils/reportStorage'
 import { mockIssues } from '../data/mockIssues'
 import { issueCategories } from '../data/issueCategories'
 import { getReports } from '../utils/reportStorage'
+import { rankRoutes, formatTimeWithPenalty } from '../utils/routeOptimizer'
 // import { useCurrentPosition } from '../hooks/useGeolocation'
 
 // Fix for default marker icons in Leaflet
@@ -332,11 +333,24 @@ function Map({
         // Listen for routesfound once and report summary
         routingControlRef.current.on('routesfound', function (e) {
             try {
-                const route = e.routes[0];
-                const summary = route.summary || { totalDistance: route.summary?.totalDistance, totalTime: route.summary?.totalTime };
+                const allRoutes = e.routes;
+                const allIssues = getReports(); // Get all reported issues
 
-                // Calculate time in a readable format
-                const totalMinutes = Math.round(summary.totalTime / 60);
+                // Rank routes based on issues and time penalties
+                const { validRoutes, blockedRoutes } = rankRoutes(allRoutes, allIssues);
+
+                console.log('Valid routes:', validRoutes.length, 'Blocked routes:', blockedRoutes.length);
+
+                // Use the best valid route (first one after ranking)
+                const bestRoute = validRoutes[0] || allRoutes[0];
+                const route = bestRoute;
+                const summary = route.summary;
+
+                // Calculate time with penalties
+                const baseMinutes = summary.totalTime / 60;
+                const penaltyMinutes = route.penaltyMinutes || 0;
+                const totalMinutes = Math.round(baseMinutes + penaltyMinutes);
+
                 const hours = Math.floor(totalMinutes / 60);
                 const minutes = totalMinutes % 60;
                 const timeString = hours > 0
@@ -345,6 +359,24 @@ function Map({
 
                 // Calculate distance in km
                 const distanceKm = (summary.totalDistance / 1000).toFixed(1);
+
+                // Build issues warning text
+                let issuesWarning = '';
+                if (route.affectedIssues && route.affectedIssues.length > 0) {
+                    issuesWarning = '<div class="route-issues-warning">';
+                    issuesWarning += '<strong>⚠️ Issues on this route:</strong><ul>';
+                    route.affectedIssues.forEach(({ issue, penalty }) => {
+                        const category = issueCategories.find(c => c.id === issue.type);
+                        issuesWarning += `<li>${category?.name || issue.type}: +${penalty} min delay</li>`;
+                    });
+                    issuesWarning += '</ul></div>';
+                }
+
+                // Show blocked routes warning if any
+                let blockedWarning = '';
+                if (blockedRoutes.length > 0) {
+                    blockedWarning = `<div class="route-blocked-warning"><strong>🚫 ${blockedRoutes.length} route(s) blocked</strong> due to road closures</div>`;
+                }
 
                 // Add popup to the route line when clicked
                 const routeLine = route.coordinates;
@@ -362,16 +394,20 @@ function Map({
                         routeLayers.forEach((layer) => {
                             layer.bindPopup(`
                                 <div class="route-info-popup">
-                                    <h3>🚗 Route Information</h3>
+                                    <h3>🚗 ${validRoutes[0] === route ? 'Best Route' : 'Alternative Route'}</h3>
                                     <div class="route-info-time">
                                         <strong>⏱️ Travel Time:</strong> ${timeString}
+                                        ${penaltyMinutes > 0 ? `<span class="time-penalty">(+${Math.round(penaltyMinutes)} min delay)</span>` : ''}
                                     </div>
                                     <div class="route-info-distance">
                                         <strong>📏 Distance:</strong> ${distanceKm} km
                                     </div>
+                                    ${issuesWarning}
+                                    ${blockedWarning}
+                                    ${validRoutes.length > 1 ? '<p class="route-alternatives-note">💡 Alternative routes available in the panel</p>' : ''}
                                 </div>
                             `, {
-                                maxWidth: 300
+                                maxWidth: 350
                             });
                         });
                     }, 500);
