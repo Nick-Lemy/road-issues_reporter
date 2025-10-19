@@ -490,7 +490,16 @@ function Map({
                 }
 
                 if (onRouteCreated) {
-                    onRouteCreated({ start, end, summary, distance: route.summary.totalDistance, time: route.summary.totalTime });
+                    onRouteCreated({
+                        start,
+                        end,
+                        summary,
+                        distance: route.summary.totalDistance,
+                        time: route.summary.totalTime,
+                        routeCoordinates: route.coordinates || [], // Include route coordinates
+                        penaltyMinutes: route.penaltyMinutes || 0,
+                        affectedIssues: route.affectedIssues || []
+                    });
                 }
             } catch (err) {
                 console.warn('Could not extract route summary', err);
