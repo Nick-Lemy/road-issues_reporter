@@ -65,7 +65,6 @@ export default function IssuesList({ onIssueClick }) {
                                 {issue.description && <div className="alert-subtitle">{issue.description}</div>}
                                 <div className="alert-time">
                                     {getTimeAgo(issue.createdAt)}
-                                    {issue.status && ` • ${issue.status}`}
                                 </div>
                             </div>
                         </div>

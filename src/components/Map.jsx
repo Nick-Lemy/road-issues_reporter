@@ -188,8 +188,7 @@ function Map({
                         <div class="marker-popup">
                             <h3>${category.icon} ${report.title}</h3>
                             <p>${report.description || 'No description provided'}</p>
-                            <p class="popup-time">Reported: ${new Date(report.timestamp).toLocaleString()}</p>
-                            <span class="popup-status ${report.status}">${report.status}</span>
+                            <p class="popup-time">Reported: ${new Date(report.createdAt).toLocaleString()}</p>
                         </div>
                     `);
 
