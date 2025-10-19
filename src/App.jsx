@@ -89,7 +89,6 @@ function AppContent() {
   const [selectedPlace, setSelectedPlace] = useState(null)
   const [favorites, setFavorites] = useState(getFavorites())
   const [latestRoute, setLatestRoute] = useState(null)
-  const [showAdminPanel, setShowAdminPanel] = useState(false)
   const [userReports, setUserReports] = useState([])
 
   // Start auto-cleanup on mount
@@ -212,7 +211,7 @@ function AppContent() {
           {isAdmin() && (
             <button
               className="language-btn"
-              onClick={() => setShowAdminPanel(true)}
+              onClick={() => setActiveTab('admin')}
               title="Admin Panel"
             >
               <Shield size={24} />
@@ -458,11 +457,11 @@ function AppContent() {
 
               {isAdmin() && (
                 <button
-                  onClick={() => setShowAdminPanel(true)}
+                  onClick={() => setActiveTab('admin')}
                   style={{
                     width: '100%',
                     padding: '12px',
-                    background: '#3b82f6',
+                    background: '#0098a3',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
@@ -517,6 +516,13 @@ function AppContent() {
             </div>
           </div>
         )}
+
+        {/* ADMIN TAB */}
+        {activeTab === 'admin' && isAdmin() && (
+          <div className="tab-content">
+            <AdminPanel onClose={() => setActiveTab('home')} />
+          </div>
+        )}
       </div>
 
       {/* Bottom Navigation */}
@@ -534,12 +540,6 @@ function AppContent() {
         routePoints={reportRoutePoints}
         onCategoryChange={handleCategoryChange}
         selectedCategory={reportCategory}
-      />
-
-      {/* Admin Panel */}
-      <AdminPanel
-        isOpen={showAdminPanel}
-        onClose={() => setShowAdminPanel(false)}
       />
     </div>
   )
