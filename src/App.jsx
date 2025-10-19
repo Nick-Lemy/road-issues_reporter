@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin, Globe, LogIn, LogOut, Shield } from 'lucide-react'
+import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin, Globe, LogIn, LogOut, Shield, BellIcon } from 'lucide-react'
 import Map from './components/Map'
 import SearchBar from './components/SearchBar'
 import SplashScreen from './components/SplashScreen'
@@ -13,6 +13,7 @@ import LoginPage from './components/LoginPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { saveIssue, subscribeToUserIssues, subscribeToActiveIssues } from './services/issueService'
 import { startAutoCleanup, stopAutoCleanup } from './services/cleanupService'
+import { requestNotificationPermission, monitorFavoriteRoutes, showNotification } from './services/notificationService'
 import { issueCategories } from './data/issueCategories'
 import { t } from './utils/i18n'
 import './App.css'
@@ -74,6 +75,21 @@ function AppContent() {
   const [latestRoute, setLatestRoute] = useState(null)
   const [userReports, setUserReports] = useState([])
   const [latestIssues, setLatestIssues] = useState([])
+  const [allActiveIssues, setAllActiveIssues] = useState([])
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+
+  // Request notification permission on mount
+  useEffect(() => {
+    requestNotificationPermission().then(permission => {
+      setNotificationsEnabled(permission === 'granted')
+      if (permission === 'granted') {
+        showNotification('Dryvupp Notifications Enabled', {
+          body: 'You\'ll receive alerts about traffic on your saved routes',
+          tag: 'welcome'
+        })
+      }
+    })
+  }, [])
 
   // Start auto-cleanup on mount
   useEffect(() => {
@@ -89,9 +105,27 @@ function AppContent() {
         new Date(b.createdAt) - new Date(a.createdAt)
       ).slice(0, 5)
       setLatestIssues(sorted)
+
+      // Store all issues for route monitoring
+      setAllActiveIssues(issues)
     })
     return () => unsubscribe()
   }, [])
+
+  // Monitor favorite routes for traffic issues
+  useEffect(() => {
+    if (notificationsEnabled && favorites.length > 0 && allActiveIssues.length > 0) {
+      // Check every 5 minutes
+      const interval = setInterval(() => {
+        monitorFavoriteRoutes(favorites, allActiveIssues)
+      }, 5 * 60 * 1000)
+
+      // Check immediately
+      monitorFavoriteRoutes(favorites, allActiveIssues)
+
+      return () => clearInterval(interval)
+    }
+  }, [favorites, allActiveIssues, notificationsEnabled])
 
   // Load user reports when user changes
   useEffect(() => {
@@ -277,17 +311,50 @@ function AppContent() {
                   language={language}
                 />
                 <div className="favorites-inline">
-                  <button onClick={() => {
-                    if (!latestRoute) return alert(t('createRouteFirst', language));
-                    const favs = saveFavorite(latestRoute);
-                    setFavorites(favs);
-                    alert(t('savedFavorite', language));
-                  }}>{t('saveFavorite', language)}</button>
+                  <button
+                    onClick={() => {
+                      if (!latestRoute) return alert(t('createRouteFirst', language));
+                      if (favorites.length >= 2) {
+                        alert('You can save up to 2 routes in the free version. Delete one first.');
+                        return;
+                      }
+                      const favs = saveFavorite(latestRoute);
+                      setFavorites(favs);
+                      alert(t('savedFavorite', language));
+                    }}
+                    disabled={favorites.length >= 2}
+                  >
+                    {t('saveFavorite', language)} ({favorites.length}/2)
+                  </button>
+
+                  {!notificationsEnabled && favorites.length > 0 && (
+                    <button
+                      onClick={async () => {
+                        const permission = await requestNotificationPermission();
+                        if (permission === 'granted') {
+                          setNotificationsEnabled(true);
+                          alert('Notifications enabled! You\'ll receive alerts about traffic on your saved routes.');
+                        } else {
+                          alert('Notifications permission denied. Enable it in your browser settings.');
+                        }
+                      }}
+                      style={{
+                        background: '#f59e0b',
+                        color: 'white'
+                      }}
+                    >
+                      🔔 Enable Traffic Alerts
+                    </button>
+                  )}
+
                   {favorites.map(f => (
                     <div key={f.id} className="fav-inline-item">
                       <button onClick={() => {
                         setSelectedPlace({ lat: f.end.lat, lng: f.end.lng });
-                      }}>{f.name || t('favorite', language)}</button>
+                      }}>
+                        📍 {f.name || 'Saved Route'}
+                        {f.penaltyMinutes > 0 && ` (+${Math.round(f.penaltyMinutes)}min traffic)`}
+                      </button>
                       <button onClick={() => {
                         const newF = deleteFavorite(f.id);
                         setFavorites(newF);
@@ -521,6 +588,42 @@ function AppContent() {
 
               <div className="settings-section">
                 <h3 className="section-title">Settings</h3>
+
+                <div className="setting-item">
+                  <span style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+                    <BellIcon />
+                    <p>
+                      Traffic Notifications
+                    </p>
+                  </span>
+                  <button
+                    onClick={async () => {
+                      if (notificationsEnabled) {
+                        alert('Notifications are enabled. To disable, go to browser settings.');
+                      } else {
+                        const permission = await requestNotificationPermission();
+                        if (permission === 'granted') {
+                          setNotificationsEnabled(true);
+                          showNotification('Notifications Enabled', {
+                            body: 'You\'ll receive traffic alerts for your saved routes'
+                          });
+                        }
+                      }
+                    }}
+                    style={{
+                      padding: '6px 12px',
+                      background: notificationsEnabled ? '#10b981' : '#6b7280',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {notificationsEnabled ? 'Enabled ✓' : 'Disabled'}
+                  </button>
+                </div>
+
                 <div className="setting-item">
                   <span>Language</span>
                   <select
