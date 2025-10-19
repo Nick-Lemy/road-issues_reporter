@@ -11,45 +11,11 @@ import MapLegend from './components/MapLegend'
 import AdminPanel from './components/AdminPanel'
 import LoginPage from './components/LoginPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { saveIssue, subscribeToUserIssues } from './services/issueService'
+import { saveIssue, subscribeToUserIssues, subscribeToActiveIssues } from './services/issueService'
 import { startAutoCleanup, stopAutoCleanup } from './services/cleanupService'
+import { issueCategories } from './data/issueCategories'
 import { t } from './utils/i18n'
 import './App.css'
-
-const ALERTS = [
-  {
-    id: 1,
-    type: 'roadworks',
-    title: 'Roadworks on KG 7 Ave — expect delays',
-    time: '10 min ago',
-    icon: 'Construction'
-  },
-  {
-    id: 2,
-    type: 'closure',
-    title: 'Road closure at Gishushu',
-    subtitle: 'for event until 3 PM',
-    time: '30 min ago',
-    icon: 'Ban'
-  },
-  {
-    id: 3,
-    type: 'accident',
-    title: 'Accident on KN 3 Ave — alternate route',
-    subtitle: 'recommended',
-    time: '1 hr ago',
-    icon: 'AlertOctagon'
-  }
-]
-
-const getIconComponent = (iconName, size = 24) => {
-  const icons = {
-    Construction: <Construction size={size} />,
-    Ban: <Ban size={size} />,
-    AlertOctagon: <AlertOctagon size={size} />
-  }
-  return icons[iconName] || <AlertTriangle size={size} />
-}
 
 const getReportTypeIcon = (type, size = 24) => {
   const icons = {
@@ -63,6 +29,23 @@ const getReportTypeIcon = (type, size = 24) => {
     other: <MapPin size={size} />
   }
   return icons[type] || <MapPin size={size} />
+}
+
+// Helper function to format time ago
+const getTimeAgo = (timestamp) => {
+  if (!timestamp) return 'Just now'
+
+  const now = new Date()
+  const then = new Date(timestamp)
+  const diffMs = now - then
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 1) return 'Just now'
+  if (diffMins < 60) return `${diffMins} min ago`
+  if (diffHours < 24) return `${diffHours} hr ago`
+  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
 }
 
 function App() {
@@ -90,11 +73,24 @@ function AppContent() {
   const [favorites, setFavorites] = useState(getFavorites())
   const [latestRoute, setLatestRoute] = useState(null)
   const [userReports, setUserReports] = useState([])
+  const [latestIssues, setLatestIssues] = useState([])
 
   // Start auto-cleanup on mount
   useEffect(() => {
     startAutoCleanup()
     return () => stopAutoCleanup()
+  }, [])
+
+  // Subscribe to latest issues for alerts
+  useEffect(() => {
+    const unsubscribe = subscribeToActiveIssues((issues) => {
+      // Get the 5 most recent issues
+      const sorted = [...issues].sort((a, b) =>
+        new Date(b.createdAt) - new Date(a.createdAt)
+      ).slice(0, 5)
+      setLatestIssues(sorted)
+    })
+    return () => unsubscribe()
   }, [])
 
   // Load user reports when user changes
@@ -341,16 +337,41 @@ function AppContent() {
             <div className="alerts-section">
               <h2 className="section-title">{t('latestAlerts', language)}</h2>
               <div className="alerts-list">
-                {ALERTS.map(alert => (
-                  <div key={alert.id} className={`alert-card alert-${alert.type}`}>
-                    <div className="alert-icon">{getIconComponent(alert.icon, 32)}</div>
-                    <div className="alert-content">
-                      <div className="alert-title">{alert.title}</div>
-                      {alert.subtitle && <div className="alert-subtitle">{alert.subtitle}</div>}
-                      <div className="alert-time">{alert.time}</div>
-                    </div>
+                {latestIssues.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '40px 20px',
+                    color: '#6b7280',
+                    fontSize: '14px'
+                  }}>
+                    No recent issues reported
                   </div>
-                ))}
+                ) : (
+                  latestIssues.map(issue => {
+                    const category = issueCategories.find(cat => cat.id === issue.type) || issueCategories[0]
+                    return (
+                      <div
+                        key={issue.id}
+                        className={`alert-card alert-${issue.type}`}
+                        onClick={() => handleIssueClick(issue)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="alert-icon">{getReportTypeIcon(issue.type, 32)}</div>
+                        <div className="alert-content">
+                          <div className="alert-title">{issue.title || category.name}</div>
+                          {issue.description && (
+                            <div className="alert-subtitle">
+                              {issue.description.length > 50
+                                ? issue.description.substring(0, 50) + '...'
+                                : issue.description}
+                            </div>
+                          )}
+                          <div className="alert-time">{getTimeAgo(issue.createdAt)}</div>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
               </div>
             </div>
           </>
