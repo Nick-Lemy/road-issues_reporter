@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin, Globe } from 'lucide-react'
+import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin, Globe, LogIn, LogOut, Shield } from 'lucide-react'
 import Map from './components/Map'
 import SearchBar from './components/SearchBar'
 import SplashScreen from './components/SplashScreen'
@@ -8,7 +8,11 @@ import { getFavorites, saveFavorite, deleteFavorite } from './utils/favoritesSto
 import IssueReportModal from './components/IssueReportModal'
 import IssuesList from './components/IssuesList'
 import MapLegend from './components/MapLegend'
-import { saveReport, getReports } from './utils/reportStorage'
+import AdminPanel from './components/AdminPanel'
+import LoginPage from './components/LoginPage'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { saveIssue, subscribeToUserIssues } from './services/issueService'
+import { startAutoCleanup, stopAutoCleanup } from './services/cleanupService'
 import { t } from './utils/i18n'
 import './App.css'
 
@@ -62,6 +66,15 @@ const getReportTypeIcon = (type, size = 24) => {
 }
 
 function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  )
+}
+
+function AppContent() {
+  const { currentUser, logout, isAdmin } = useAuth()
   const [showSplash, setShowSplash] = useState(true)
   const [activeTab, setActiveTab] = useState('home')
   const [language, setLanguage] = useState('English')
@@ -76,6 +89,27 @@ function App() {
   const [selectedPlace, setSelectedPlace] = useState(null)
   const [favorites, setFavorites] = useState(getFavorites())
   const [latestRoute, setLatestRoute] = useState(null)
+  const [showAdminPanel, setShowAdminPanel] = useState(false)
+  const [userReports, setUserReports] = useState([])
+
+  // Start auto-cleanup on mount
+  useEffect(() => {
+    startAutoCleanup()
+    return () => stopAutoCleanup()
+  }, [])
+
+  // Load user reports when user changes
+  useEffect(() => {
+    if (currentUser) {
+      // Subscribe to user's own issues
+      const unsubscribe = subscribeToUserIssues(currentUser.uid, (issues) => {
+        setUserReports(issues)
+      })
+      return () => unsubscribe()
+    } else {
+      setUserReports([])
+    }
+  }, [currentUser])
 
   // Handle tab changes
   useEffect(() => {
@@ -99,15 +133,26 @@ function App() {
     setIsModalOpen(false)
   }
 
-  const handleIssueSubmit = (issueData) => {
+  const handleIssueSubmit = async (issueData) => {
     console.log('New issue reported:', issueData)
-    saveReport(issueData)
-    setIsModalOpen(false)
-    setReportingMode(false)
-    setReportRoutePoints([])
-    setRefreshReports(prev => prev + 1)
-    setActiveTab('home')
-    alert(t('reportSuccess', language))
+
+    try {
+      await saveIssue(
+        issueData,
+        currentUser.uid,
+        currentUser.email,
+        currentUser.displayName || 'Anonymous'
+      )
+      setIsModalOpen(false)
+      setReportingMode(false)
+      setReportRoutePoints([])
+      setRefreshReports(prev => prev + 1)
+      setActiveTab('home')
+      alert(t('reportSuccess', language))
+    } catch (error) {
+      console.error('Error submitting report:', error)
+      alert('Failed to submit report. Please try again.')
+    }
   }
 
   const handleModalClose = () => {
@@ -134,11 +179,21 @@ function App() {
     setReportCategory(category)
   }
 
-  const userReports = getReports()
+  const handleLogout = async () => {
+    if (window.confirm('Are you sure you want to log out?')) {
+      await logout()
+      setActiveTab('home')
+    }
+  }
 
   // Show splash screen on first load
   if (showSplash) {
     return <SplashScreen onComplete={() => setShowSplash(false)} />
+  }
+
+  // Show login page if user is not authenticated
+  if (!currentUser) {
+    return <LoginPage />
   }
 
   return (
@@ -153,12 +208,30 @@ function App() {
           />
           <h1 className="mobile-header-title">{t('appTitle', language)}</h1>
         </div>
-        <button
-          className="language-btn"
-          onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-        >
-          <Globe size={24} />
-        </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {isAdmin() && (
+            <button
+              className="language-btn"
+              onClick={() => setShowAdminPanel(true)}
+              title="Admin Panel"
+            >
+              <Shield size={24} />
+            </button>
+          )}
+          {/* <button
+            className="language-btn"
+            onClick={handleLogout}
+            title="Logout"
+          >
+            <LogOut size={24} />
+          </button> */}
+          <button
+            className="language-btn"
+            onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+          >
+            <Globe size={24} />
+          </button>
+        </div>
       </header>
 
       {/* Language Menu Dropdown */}
@@ -355,8 +428,21 @@ function App() {
                 <div className="profile-avatar">
                   <MapPin size={48} />
                 </div>
-                <h3>Denise Izabayo</h3>
-                <p className="profile-subtitle">{t('navProfile', language)}</p>
+                <h3>{currentUser.displayName || 'User'}</h3>
+                <p className="profile-subtitle">{currentUser.email}</p>
+                {isAdmin() && (
+                  <div style={{
+                    marginTop: '8px',
+                    padding: '4px 12px',
+                    background: '#fbbf24',
+                    color: '#78350f',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '600'
+                  }}>
+                    ADMIN
+                  </div>
+                )}
               </div>
 
               <div className="stats-grid">
@@ -369,6 +455,49 @@ function App() {
                   <div className="stat-label">{t('favorite', language)}</div>
                 </div>
               </div>
+
+              {isAdmin() && (
+                <button
+                  onClick={() => setShowAdminPanel(true)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    background: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    marginBottom: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <Shield size={20} />
+                  Admin Panel
+                </button>
+              )}
+
+              <button
+                onClick={handleLogout}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  marginBottom: '16px'
+                }}
+              >
+                Sign Out
+              </button>
 
               <div className="settings-section">
                 <h3 className="section-title">Settings</h3>
@@ -405,6 +534,12 @@ function App() {
         routePoints={reportRoutePoints}
         onCategoryChange={handleCategoryChange}
         selectedCategory={reportCategory}
+      />
+
+      {/* Admin Panel */}
+      <AdminPanel
+        isOpen={showAdminPanel}
+        onClose={() => setShowAdminPanel(false)}
       />
     </div>
   )

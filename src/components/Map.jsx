@@ -7,10 +7,8 @@ import { Navigation, X, MapPin, Satellite, AlertTriangle } from 'lucide-react'
 import { initialTrafficSegments, startTrafficSimulator } from '../data/mockTraffic'
 import { getFavorites } from '../utils/favoritesStorage'
 // Map accepts prop `selectedPlace` to navigate to, and `onRouteCreated` callback
-import { onReportsUpdated } from '../utils/reportStorage'
-import { mockIssues } from '../data/mockIssues'
+import { subscribeToActiveIssues } from '../services/issueService'
 import { issueCategories } from '../data/issueCategories'
-import { getReports } from '../utils/reportStorage'
 import { rankRoutes, formatTimeWithPenalty } from '../utils/routeOptimizer'
 // import { useCurrentPosition } from '../hooks/useGeolocation'
 
@@ -48,51 +46,67 @@ function Map({
     const [isSatelliteView, setIsSatelliteView] = useState(false)
     const [userLocation, setUserLocation] = useState(null)
     const [trafficSegments, setTrafficSegments] = useState(initialTrafficSegments)
+    const [issues, setIssues] = useState([])
     const trafficLayerRef = useRef([])
 
-    const addIssueMarkers = () => {
-        if (!mapInstanceRef.current) return;
+    // Subscribe to active issues from Firebase
+    useEffect(() => {
+        const unsubscribe = subscribeToActiveIssues((issuesData) => {
+            setIssues(issuesData)
+        })
+        return () => unsubscribe()
+    }, [])
 
-        // Clear existing issue markers only
-        markersRef.current.forEach(marker => marker.remove());
-        markersRef.current = [];
+    // const addIssueMarkers = () => {
+    //     if (!mapInstanceRef.current) return;
 
-        mockIssues.forEach(issue => {
-            const category = issueCategories.find(cat => cat.id === issue.type);
+    //     // Clear existing issue markers only
+    //     markersRef.current.forEach(marker => marker.remove());
+    //     markersRef.current = [];
 
-            // Create custom icon
-            const customIcon = L.divIcon({
-                className: 'custom-marker',
-                html: `<div class="marker-pin" style="background-color: ${category?.color || '#6b7280'}">
-                        <span class="marker-emoji">${category?.icon || '📍'}</span>
-                       </div>`,
-                iconSize: [40, 40],
-                iconAnchor: [20, 40],
-                popupAnchor: [0, -40]
-            });
+    //     issues.forEach(issue => {
+    //         // Skip issues without location data
+    //         if (!issue.startLocation || !issue.startLocation.lat || !issue.startLocation.lng) {
+    //             console.warn('Issue missing location data:', issue);
+    //             return;
+    //         }
 
-            const marker = L.marker([issue.location.lat, issue.location.lng], {
-                icon: customIcon
-            }).addTo(mapInstanceRef.current);
+    //         const category = issueCategories.find(cat => cat.id === issue.type);
 
-            marker.bindPopup(`
-                <div class="marker-popup">
-                    <h3>${issue.title}</h3>
-                    <p>${issue.description}</p>
-                    <p class="popup-location">${issue.location.address}</p>
-                    <button onclick="alert('View Details')" class="popup-btn">View Details</button>
-                </div>
-            `);
+    //         // Create custom icon
+    //         const customIcon = L.divIcon({
+    //             className: 'custom-marker',
+    //             html: `<div class="marker-pin" style="background-color: ${category?.color || '#6b7280'}">
+    //                     <span class="marker-emoji">${category?.icon || '📍'}</span>
+    //                    </div>`,
+    //             iconSize: [40, 40],
+    //             iconAnchor: [20, 40],
+    //             popupAnchor: [0, -40]
+    //         });
 
-            marker.on('click', () => {
-                if (onIssueSelect) {
-                    onIssueSelect(issue);
-                }
-            });
+    //         // Use startLocation for the marker position
+    //         const marker = L.marker([issue.startLocation.lat, issue.startLocation.lng], {
+    //             icon: customIcon
+    //         }).addTo(mapInstanceRef.current);
 
-            markersRef.current.push(marker);
-        });
-    }
+    //         marker.bindPopup(`
+    //             <div class="marker-popup">
+    //                 <h3>${category?.icon || '📍'} ${issue.title || 'Road Issue'}</h3>
+    //                 <p>${issue.description || 'No description'}</p>
+    //                 <p class="popup-location">Reported by: ${issue.displayName || 'Anonymous'}</p>
+    //                 <button onclick="alert('View Details')" class="popup-btn">View Details</button>
+    //             </div>
+    //         `);
+
+    //         marker.on('click', () => {
+    //             if (onIssueSelect) {
+    //                 onIssueSelect(issue);
+    //             }
+    //         });
+
+    //         markersRef.current.push(marker);
+    //     });
+    // }
 
     // Render traffic segments
     const renderTraffic = (segments) => {
@@ -131,9 +145,8 @@ function Map({
         });
         reportLinesRef.current = [];
 
-        const reports = getReports();
-
-        reports.forEach(report => {
+        // Use issues from Firebase state
+        issues.forEach(report => {
             const category = issueCategories.find(cat => cat.id === report.type);
             if (!category || !report.routePoints || report.routePoints.length !== 2) return;
 
@@ -335,7 +348,8 @@ function Map({
         routingControlRef.current.on('routesfound', function (e) {
             try {
                 const allRoutes = e.routes;
-                const allIssues = getReports(); // Get all reported issues
+                // Use issues from state instead of getReports()
+                const allIssues = issues;
 
                 // Rank routes based on issues and time penalties
                 const { validRoutes, blockedRoutes } = rankRoutes(allRoutes, allIssues);
@@ -633,7 +647,7 @@ function Map({
         }
 
         // Add issue markers and reported issues
-        addIssueMarkers();
+        // addIssueMarkers();
         displayReportedIssues();
 
         // Start traffic simulator
@@ -642,16 +656,8 @@ function Map({
             renderTraffic(segments);
         }, 8000);
 
-        // Listen for report updates from other tabs
-        const stopListening = onReportsUpdated((updatedReports) => {
-            console.log('Reports updated via BroadcastChannel', updatedReports);
-            // Refresh displayed reported issues
-            displayReportedIssues();
-        });
-
         return () => {
             stopSim && stopSim();
-            stopListening && stopListening();
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();
                 mapInstanceRef.current = null;
@@ -660,10 +666,14 @@ function Map({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    // Refresh reported issues when refreshReports changes
+    // Refresh markers and lines when issues change
     useEffect(() => {
-        displayReportedIssues();
-    }, [refreshReports])
+        if (mapInstanceRef.current) {
+            // addIssueMarkers();
+            displayReportedIssues();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [issues, refreshReports])
 
     // Handle reporting mode
     useEffect(() => {

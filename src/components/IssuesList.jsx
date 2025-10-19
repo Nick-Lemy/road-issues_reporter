@@ -1,7 +1,7 @@
+import { useState, useEffect } from 'react'
 import { Car, AlertOctagon, Pickaxe, Construction, Ban, Droplet, Blocks, MapPin } from 'lucide-react'
-import { mockIssues } from '../data/mockIssues'
 import { issueCategories } from '../data/issueCategories'
-import { getReports } from '../utils/reportStorage'
+import { subscribeToActiveIssues } from '../services/issueService'
 
 const getIconComponent = (iconName, size = 32) => {
     const icons = {
@@ -18,8 +18,20 @@ const getIconComponent = (iconName, size = 32) => {
 }
 
 export default function IssuesList({ onIssueClick }) {
+    const [issues, setIssues] = useState([])
+
+    useEffect(() => {
+        const unsubscribe = subscribeToActiveIssues((issuesData) => {
+            setIssues(issuesData)
+        })
+
+        return () => unsubscribe()
+    }, [])
+
     const getTimeAgo = (timestamp) => {
-        const minutes = Math.floor((Date.now() - timestamp) / (1000 * 60))
+        const now = Date.now()
+        const issueTime = timestamp instanceof Date ? timestamp.getTime() : new Date(timestamp).getTime()
+        const minutes = Math.floor((now - issueTime) / (1000 * 60))
         if (minutes < 60) return `${minutes} min ago`
         const hours = Math.floor(minutes / 60)
         if (hours < 24) return `${hours} hr${hours > 1 ? 's' : ''} ago`
@@ -31,34 +43,35 @@ export default function IssuesList({ onIssueClick }) {
         return issueCategories.find(cat => cat.id === type) || issueCategories[issueCategories.length - 1]
     }
 
-    // Combine mock issues and user reports
-    const userReports = getReports()
-    const allIssues = [...mockIssues, ...userReports]
-
     return (
         <div className="issues-list">
-            {allIssues.map(issue => {
-                const category = getCategory(issue.type)
-                return (
-                    <div
-                        key={issue.id}
-                        className={`alert-card alert-${issue.type}`}
-                        onClick={() => onIssueClick && onIssueClick(issue)}
-                        style={{ cursor: onIssueClick ? 'pointer' : 'default' }}
-                    >
-                        <div className="alert-icon">{getIconComponent(category.icon)}</div>
-                        <div className="alert-content">
-                            <div className="alert-title">{issue.title}</div>
-                            <div className="alert-subtitle">
-                                {issue.location?.address || issue.description || 'Road section issue'}
-                            </div>
-                            <div className="alert-time">
-                                {getTimeAgo(issue.timestamp)} • {issue.status === 'verified' ? '✓ Verified' : issue.status || 'Pending'}
+            {issues.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
+                    No active issues reported
+                </div>
+            ) : (
+                issues.map(issue => {
+                    const category = getCategory(issue.type)
+                    return (
+                        <div
+                            key={issue.id}
+                            className={`alert-card alert-${issue.type}`}
+                            onClick={() => onIssueClick && onIssueClick(issue)}
+                            style={{ cursor: onIssueClick ? 'pointer' : 'default' }}
+                        >
+                            <div className="alert-icon">{getIconComponent(category.icon)}</div>
+                            <div className="alert-content">
+                                <div className="alert-title">{issue.title || 'Road Issue'}</div>
+                                {issue.description && <div className="alert-subtitle">{issue.description}</div>}
+                                <div className="alert-time">
+                                    {getTimeAgo(issue.createdAt)}
+                                    {issue.status && ` • ${issue.status}`}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )
-            })}
+                    )
+                })
+            )}
         </div>
     )
 }

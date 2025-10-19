@@ -20,7 +20,8 @@ export default function IssueReportModal({ isOpen, onClose, onSubmit, routePoint
     const [formData, setFormData] = useState({
         type: 'traffic',
         title: '',
-        description: ''
+        description: '',
+        duration: 24 // Default 24 hours
     })
 
     useEffect(() => {
@@ -64,7 +65,8 @@ export default function IssueReportModal({ isOpen, onClose, onSubmit, routePoint
         setFormData({
             type: 'traffic',
             title: '',
-            description: ''
+            description: '',
+            duration: 24
         })
     }
 
@@ -156,6 +158,30 @@ export default function IssueReportModal({ isOpen, onClose, onSubmit, routePoint
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             rows={4}
                         />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">
+                            Duration (hours) *
+                            <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: '8px' }}>
+                                Issue will auto-delete after this time
+                            </span>
+                        </label>
+                        <select
+                            className="form-input"
+                            value={formData.duration}
+                            onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
+                            required
+                        >
+                            <option value={1}>1 hour</option>
+                            <option value={3}>3 hours</option>
+                            <option value={6}>6 hours</option>
+                            <option value={12}>12 hours</option>
+                            <option value={24}>24 hours (1 day)</option>
+                            <option value={48}>48 hours (2 days)</option>
+                            <option value={72}>72 hours (3 days)</option>
+                            <option value={168}>168 hours (1 week)</option>
+                        </select>
                     </div>
 
                     <div className="modal-actions">
