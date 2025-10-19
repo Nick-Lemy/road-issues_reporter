@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin, Globe, LogIn, LogOut, Shield } from 'lucide-react'
+import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin, Globe, LogIn, LogOut, Shield, BellIcon } from 'lucide-react'
 import Map from './components/Map'
 import SearchBar from './components/SearchBar'
 import SplashScreen from './components/SplashScreen'
@@ -590,7 +590,12 @@ function AppContent() {
                 <h3 className="section-title">Settings</h3>
 
                 <div className="setting-item">
-                  <span>🔔 Traffic Notifications</span>
+                  <span style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+                    <BellIcon />
+                    <p>
+                      Traffic Notifications
+                    </p>
+                  </span>
                   <button
                     onClick={async () => {
                       if (notificationsEnabled) {
