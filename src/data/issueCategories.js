@@ -6,7 +6,7 @@ export const issueCategories = [
         color: '#ef4444',
         lineStyle: {
             color: '#ef4444',
-            weight: 8,
+            weight: 5,
             opacity: 0.8,
             dashArray: '1, 10',
             lineCap: 'round'
@@ -19,7 +19,7 @@ export const issueCategories = [
         color: '#f59e0b',
         lineStyle: {
             color: '#f59e0b',
-            weight: 8,
+            weight: 5,
             opacity: 0.8,
             dashArray: '20, 10, 5, 10',
             lineCap: 'square'
@@ -32,7 +32,7 @@ export const issueCategories = [
         color: '#dc2626',
         lineStyle: {
             color: '#dc2626',
-            weight: 10,
+            weight: 6,
             opacity: 0.9,
             dashArray: '5, 5',
             lineCap: 'round'
@@ -45,7 +45,7 @@ export const issueCategories = [
         color: '#b91c1c',
         lineStyle: {
             color: '#b91c1c',
-            weight: 12,
+            weight: 7,
             opacity: 0.9,
             dashArray: null // solid line
         }
@@ -57,7 +57,7 @@ export const issueCategories = [
         color: '#3b82f6',
         lineStyle: {
             color: '#3b82f6',
-            weight: 8,
+            weight: 5,
             opacity: 0.8,
             dashArray: '10, 5, 2, 5',
             lineCap: 'round'
@@ -70,7 +70,7 @@ export const issueCategories = [
         color: '#78716c',
         lineStyle: {
             color: '#78716c',
-            weight: 7,
+            weight: 4,
             opacity: 0.7,
             dashArray: '15, 10',
             lineCap: 'round'
@@ -83,7 +83,7 @@ export const issueCategories = [
         color: '#f97316',
         lineStyle: {
             color: '#f97316',
-            weight: 10,
+            weight: 6,
             opacity: 0.9,
             dashArray: '15, 15',
             lineCap: 'round'
@@ -96,7 +96,7 @@ export const issueCategories = [
         color: '#6b7280',
         lineStyle: {
             color: '#6b7280',
-            weight: 6,
+            weight: 4,
             opacity: 0.6,
             dashArray: '5, 10',
             lineCap: 'round'
