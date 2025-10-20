@@ -313,12 +313,12 @@ function Map({
             containerClassName: 'routing-panel-visible',
             lineOptions: {
                 styles: [
-                    { color: '#0098a3', opacity: 0.8, weight: 6 }
+                    { color: '#0050cb', opacity: 0.8, weight: 4 }
                 ]
             },
             altLineOptions: {
                 styles: [
-                    { color: '#9ca3af', opacity: 0.6, weight: 4 }
+                    { color: '#9ca3af', opacity: 0.6, weight: 3 }
                 ]
             },
             // Custom formatter to show time and distance
