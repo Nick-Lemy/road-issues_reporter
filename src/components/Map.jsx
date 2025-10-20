@@ -313,7 +313,7 @@ function Map({
             containerClassName: 'routing-panel-visible',
             lineOptions: {
                 styles: [
-                    { color: '#0098a3', opacity: 0.8, weight: 6 }
+                    { color: '#0050cb', opacity: 0.8, weight: 6 }
                 ]
             },
             altLineOptions: {
