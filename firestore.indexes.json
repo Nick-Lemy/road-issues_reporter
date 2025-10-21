@@ -1,0 +1,15 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "userPoints",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "points",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
