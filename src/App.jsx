@@ -4,6 +4,7 @@ import Map from './components/Map'
 import SearchBar from './components/SearchBar'
 import SplashScreen from './components/SplashScreen'
 import BottomNav from './components/BottomNav'
+import Leaderboard from './components/Leaderboard'
 import { getFavorites, saveFavorite, deleteFavorite } from './utils/favoritesStorage'
 import IssueReportModal from './components/IssueReportModal'
 import IssuesList from './components/IssuesList'
@@ -14,6 +15,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { saveIssue, subscribeToUserIssues, subscribeToActiveIssues } from './services/issueService'
 import { startAutoCleanup, stopAutoCleanup } from './services/cleanupService'
 import { requestNotificationPermission, monitorFavoriteRoutes, showNotification } from './services/notificationService'
+import { awardPointsForIssue, getUserPoints } from './services/pointsService'
 import { issueCategories } from './data/issueCategories'
 import { t } from './utils/i18n'
 import './App.css'
@@ -77,6 +79,7 @@ function AppContent() {
   const [latestIssues, setLatestIssues] = useState([])
   const [allActiveIssues, setAllActiveIssues] = useState([])
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
+  const [userPoints, setUserPoints] = useState({ points: 0, issuesReported: 0 })
 
   // Request notification permission on mount
   useEffect(() => {
@@ -134,9 +137,16 @@ function AppContent() {
       const unsubscribe = subscribeToUserIssues(currentUser.uid, (issues) => {
         setUserReports(issues)
       })
+
+      // Load user points
+      getUserPoints(currentUser.uid).then(points => {
+        setUserPoints(points)
+      })
+
       return () => unsubscribe()
     } else {
       setUserReports([])
+      setUserPoints({ points: 0, issuesReported: 0 })
     }
   }, [currentUser])
 
@@ -172,12 +182,20 @@ function AppContent() {
         currentUser.email,
         currentUser.displayName || 'Anonymous'
       )
+
+      // Award points to user for reporting
+      await awardPointsForIssue(currentUser.uid)
+
+      // Reload user points
+      const updatedPoints = await getUserPoints(currentUser.uid)
+      setUserPoints(updatedPoints)
+
       setIsModalOpen(false)
       setReportingMode(false)
       setReportRoutePoints([])
       setRefreshReports(prev => prev + 1)
       setActiveTab('home')
-      alert(t('reportSuccess', language))
+      alert(t('reportSuccess', language) + '\n+5 points earned!')
     } catch (error) {
       console.error('Error submitting report:', error)
       alert('Failed to submit report. Please try again.')
@@ -507,6 +525,13 @@ function AppContent() {
           </div>
         )}
 
+        {/* LEADERBOARD TAB */}
+        {activeTab === 'leaderboard' && (
+          <div className="tab-content">
+            <Leaderboard />
+          </div>
+        )}
+
         {/* PROFILE TAB */}
         {activeTab === 'profile' && (
           <div className="tab-content">
@@ -533,6 +558,10 @@ function AppContent() {
               </div>
 
               <div className="stats-grid">
+                <div className="stat-card">
+                  <div className="stat-number">{userPoints.points}</div>
+                  <div className="stat-label">Points</div>
+                </div>
                 <div className="stat-card">
                   <div className="stat-number">{userReports.length}</div>
                   <div className="stat-label">{t('yourReports', language)}</div>

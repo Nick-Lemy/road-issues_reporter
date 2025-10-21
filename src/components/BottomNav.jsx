@@ -1,4 +1,4 @@
-import { Home, AlertTriangle, List, User } from 'lucide-react'
+import { Home, AlertTriangle, List, Trophy, User } from 'lucide-react'
 import { t } from '../utils/i18n'
 
 export default function BottomNav({ activeTab, onTabChange, language }) {
@@ -6,6 +6,7 @@ export default function BottomNav({ activeTab, onTabChange, language }) {
         { id: 'home', icon: Home, label: t('navHome', language) },
         { id: 'report', icon: AlertTriangle, label: t('navReport', language) },
         { id: 'issues', icon: List, label: t('navIssues', language) },
+        { id: 'leaderboard', icon: Trophy, label: 'Ranking' },
         { id: 'profile', icon: User, label: t('navProfile', language) }
     ]
 
