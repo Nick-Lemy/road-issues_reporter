@@ -1,6 +1,6 @@
 # Kigali Real-Time Road Info App
 
-A real-time road information and issue reporting application for Kigali, Rwanda. Built with React, Leaflet, and OpenStreetMap.
+A real-time road information and issue reporting application for Kigali, Rwanda. Built with React, Leaflet, and OpenStreetMap for Map View.
 
 ## Features
 
