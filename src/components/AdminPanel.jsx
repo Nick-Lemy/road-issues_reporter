@@ -8,7 +8,7 @@ export default function AdminPanel({ onClose }) {
     const [issues, setIssues] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState(null);
-    const [filter, setFilter] = useState('all'); // all, active, expired
+    const [filter, setFilter] = useState('all');
     const { isAdmin } = useAuth();
 
     useEffect(() => {
