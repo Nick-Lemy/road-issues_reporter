@@ -343,7 +343,6 @@ function Map({
         }).addTo(mapInstanceRef.current);
 
         console.log('Route created from', start, 'to', end);
-        // Listen for routesfound once and report summary
         routingControlRef.current.on('routesfound', function (e) {
             try {
                 const allRoutes = e.routes;
