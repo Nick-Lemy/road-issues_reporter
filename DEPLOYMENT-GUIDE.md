@@ -279,7 +279,7 @@ Once deployed, your app will:
 
 ---
 
-## 📞 Support Resources
+## Support Resources
 
 - **PWA Docs**: https://web.dev/progressive-web-apps/
 - **Netlify Docs**: https://docs.netlify.com/
