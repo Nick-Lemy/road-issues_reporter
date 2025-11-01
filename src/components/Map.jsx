@@ -260,7 +260,7 @@ function Map({
                 }).addTo(mapInstanceRef.current);
             }
 
-            // Remove the temporary routing control
+            // Remove the temporary routing control yep that's right
             mapInstanceRef.current.removeControl(tempRouting);
         });
 
