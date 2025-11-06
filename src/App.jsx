@@ -4,6 +4,7 @@ import Map from './components/Map'
 import SearchBar from './components/SearchBar'
 import SplashScreen from './components/SplashScreen'
 import BottomNav from './components/BottomNav'
+import BottomSheet from './components/BottomSheet'
 import Leaderboard from './components/Leaderboard'
 import { getFavorites, saveFavorite, deleteFavorite } from './utils/favoritesStorage'
 import IssueReportModal from './components/IssueReportModal'
@@ -265,13 +266,6 @@ function AppContent() {
               <Shield size={24} />
             </button>
           )}
-          {/* <button
-            className="language-btn"
-            onClick={handleLogout}
-            title="Logout"
-          >
-            <LogOut size={24} />
-          </button> */}
           <button
             className="language-btn"
             onClick={() => setShowLanguageMenu(!showLanguageMenu)}
@@ -314,8 +308,20 @@ function AppContent() {
         </div>
       )}
 
-      {/* Main Content - Tab Based */}
-      <div className="main-content">
+      {/* Full Screen Map - Always Visible */}
+      <Map
+        onIssueSelect={handleIssueClick}
+        reportingMode={reportingMode || activeTab === 'report'}
+        onReportRouteSelect={handleReportRouteSelect}
+        reportCategory={reportCategory}
+        refreshReports={refreshReports}
+        focusIssue={focusedIssue}
+        selectedPlace={selectedPlace}
+        onRouteCreated={handleRouteCreated}
+      />
+
+      {/* Draggable Bottom Sheet */}
+      <BottomSheet minHeight={120} maxHeight={window.innerHeight - 140}>
 
         {/* HOME TAB */}
         {activeTab === 'home' && (
@@ -394,17 +400,6 @@ function AppContent() {
 
               {showLegend && <MapLegend language={language} />}
 
-              <Map
-                onIssueSelect={handleIssueClick}
-                reportingMode={reportingMode}
-                onReportRouteSelect={handleReportRouteSelect}
-                reportCategory={reportCategory}
-                refreshReports={refreshReports}
-                focusIssue={focusedIssue}
-                selectedPlace={selectedPlace}
-                onRouteCreated={handleRouteCreated}
-              />
-
               {!reportingMode ? (
                 <div className="map-hint">
                   <Lightbulb size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
@@ -472,18 +467,6 @@ function AppContent() {
                 <p>{t('reportingHint', language)}</p>
               </div>
             </div>
-            <div style={{ paddingInline: 16, paddingBottom: 16 }}>
-              <Map
-                onIssueSelect={handleIssueClick}
-                reportingMode={true}
-                onReportRouteSelect={handleReportRouteSelect}
-                reportCategory={reportCategory}
-                refreshReports={refreshReports}
-                focusIssue={focusedIssue}
-                selectedPlace={selectedPlace}
-                onRouteCreated={handleRouteCreated}
-              />
-            </ div>
 
             {/* User Reported Issues */}
             {userReports.length > 0 && (
@@ -676,7 +659,7 @@ function AppContent() {
             <AdminPanel onClose={() => setActiveTab('home')} />
           </div>
         )}
-      </div>
+      </BottomSheet>
 
       {/* Bottom Navigation */}
       <BottomNav
