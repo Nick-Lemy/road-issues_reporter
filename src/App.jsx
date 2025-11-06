@@ -308,358 +308,373 @@ function AppContent() {
         </div>
       )}
 
-      {/* Full Screen Map - Always Visible */}
-      <Map
-        onIssueSelect={handleIssueClick}
-        reportingMode={reportingMode || activeTab === 'report'}
-        onReportRouteSelect={handleReportRouteSelect}
-        reportCategory={reportCategory}
-        refreshReports={refreshReports}
-        focusIssue={focusedIssue}
-        selectedPlace={selectedPlace}
-        onRouteCreated={handleRouteCreated}
-      />
+      {/* Full Screen Map - Visible only on home, report, and issues tabs */}
+      {(activeTab === 'home' || activeTab === 'report' || activeTab === 'issues') && (
+        <Map
+          onIssueSelect={handleIssueClick}
+          reportingMode={reportingMode || activeTab === 'report'}
+          onReportRouteSelect={handleReportRouteSelect}
+          reportCategory={reportCategory}
+          refreshReports={refreshReports}
+          focusIssue={focusedIssue}
+          selectedPlace={selectedPlace}
+          onRouteCreated={handleRouteCreated}
+        />
+      )}
 
-      {/* Draggable Bottom Sheet */}
-      <BottomSheet minHeight={120} maxHeight={window.innerHeight - 140}>
+      {/* Floating Search Bar - Only on home tab */}
+      {activeTab === 'home' && (
+        <div className="floating-search-bar">
+          <SearchBar
+            onSelect={(place) => setSelectedPlace(place)}
+            language={language}
+          />
+        </div>
+      )}
 
-        {/* HOME TAB */}
-        {activeTab === 'home' && (
-          <>
-            {/* Search and Map Section */}
-            <div className="content-section" style={{ paddingTop: 12 }}>
-              <h2 className="section-title">{t('updatesNear', language)}</h2>
-              <div className="search-container">
-                <SearchBar
-                  onSelect={(place) => setSelectedPlace(place)}
-                  language={language}
-                />
-                <div className="favorites-inline">
-                  <button
-                    onClick={() => {
-                      if (!latestRoute) return alert(t('createRouteFirst', language));
-                      if (favorites.length >= 2) {
-                        alert('You can save up to 2 routes in the free version. Delete one first.');
-                        return;
-                      }
-                      const favs = saveFavorite(latestRoute);
-                      setFavorites(favs);
-                      alert(t('savedFavorite', language));
-                    }}
-                    disabled={favorites.length >= 2}
-                  >
-                    {t('saveFavorite', language)} ({favorites.length}/2)
-                  </button>
+      {/* Draggable Bottom Sheet - Only for tabs with map */}
+      {(activeTab === 'home' || activeTab === 'report' || activeTab === 'issues') && (
+        <BottomSheet minHeight={120} maxHeight={window.innerHeight - 140}>
 
-                  {!notificationsEnabled && favorites.length > 0 && (
+          {/* HOME TAB */}
+          {activeTab === 'home' && (
+            <>
+              {/* Search and Map Section */}
+              <div className="content-section" style={{ paddingTop: 12 }}>
+                <h2 className="section-title">{t('updatesNear', language)}</h2>
+                <div className="search-container">
+                  <div className="favorites-inline">
                     <button
-                      onClick={async () => {
-                        const permission = await requestNotificationPermission();
-                        if (permission === 'granted') {
-                          setNotificationsEnabled(true);
-                          alert('Notifications enabled! You\'ll receive alerts about traffic on your saved routes.');
-                        } else {
-                          alert('Notifications permission denied. Enable it in your browser settings.');
+                      onClick={() => {
+                        if (!latestRoute) return alert(t('createRouteFirst', language));
+                        if (favorites.length >= 2) {
+                          alert('You can save up to 2 routes in the free version. Delete one first.');
+                          return;
                         }
+                        const favs = saveFavorite(latestRoute);
+                        setFavorites(favs);
+                        alert(t('savedFavorite', language));
                       }}
-                      style={{
-                        background: '#f59e0b',
-                        color: 'white'
-                      }}
+                      disabled={favorites.length >= 2}
                     >
-                      🔔 Enable Traffic Alerts
+                      {t('saveFavorite', language)} ({favorites.length}/2)
                     </button>
-                  )}
 
-                  {favorites.map(f => (
-                    <div key={f.id} className="fav-inline-item">
-                      <button onClick={() => {
-                        setSelectedPlace({ lat: f.end.lat, lng: f.end.lng });
-                      }}>
-                        📍 {f.name || 'Saved Route'}
-                        {f.penaltyMinutes > 0 && ` (+${Math.round(f.penaltyMinutes)}min traffic)`}
+                    {!notificationsEnabled && favorites.length > 0 && (
+                      <button
+                        onClick={async () => {
+                          const permission = await requestNotificationPermission();
+                          if (permission === 'granted') {
+                            setNotificationsEnabled(true);
+                            alert('Notifications enabled! You\'ll receive alerts about traffic on your saved routes.');
+                          } else {
+                            alert('Notifications permission denied. Enable it in your browser settings.');
+                          }
+                        }}
+                        style={{
+                          background: '#f59e0b',
+                          color: 'white'
+                        }}
+                      >
+                        🔔 Enable Traffic Alerts
                       </button>
-                      <button onClick={() => {
-                        const newF = deleteFavorite(f.id);
-                        setFavorites(newF);
-                      }}>{t('deleteFavorite', language)}</button>
+                    )}
+
+                    {favorites.map(f => (
+                      <div key={f.id} className="fav-inline-item">
+                        <button onClick={() => {
+                          setSelectedPlace({ lat: f.end.lat, lng: f.end.lng });
+                        }}>
+                          📍 {f.name || 'Saved Route'}
+                          {f.penaltyMinutes > 0 && ` (+${Math.round(f.penaltyMinutes)}min traffic)`}
+                        </button>
+                        <button onClick={() => {
+                          const newF = deleteFavorite(f.id);
+                          setFavorites(newF);
+                        }}>{t('deleteFavorite', language)}</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="legend-toggle">
+                  <button
+                    className="legend-toggle-btn"
+                    onClick={() => setShowLegend(!showLegend)}
+                  >
+                    <BarChart3 size={20} />
+                    <span>{showLegend ? t('hideLegend', language) : t('showLegend', language)}</span>
+                  </button>
+                </div>
+
+                {showLegend && <MapLegend language={language} />}
+
+                {!reportingMode ? (
+                  <div className="map-hint">
+                    <Lightbulb size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                    {t('mapHint', language)}
+                  </div>
+                ) : (
+                  <div className="map-hint-warning">
+                    <Target size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+                    <strong>{t('reportingHint', language)}</strong>
+                  </div>
+                )}
+              </div>
+
+              {/* Latest Alerts Section */}
+              <div className="alerts-section">
+                <h2 className="section-title">{t('latestAlerts', language)}</h2>
+                <div className="alerts-list">
+                  {latestIssues.length === 0 ? (
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '40px 20px',
+                      color: '#6b7280',
+                      fontSize: '14px'
+                    }}>
+                      No recent issues reported
                     </div>
-                  ))}
+                  ) : (
+                    latestIssues.map(issue => {
+                      const category = issueCategories.find(cat => cat.id === issue.type) || issueCategories[0]
+                      return (
+                        <div
+                          key={issue.id}
+                          className={`alert-card alert-${issue.type}`}
+                          onClick={() => handleIssueClick(issue)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <div className="alert-icon">{getReportTypeIcon(issue.type, 32)}</div>
+                          <div className="alert-content">
+                            <div className="alert-title">{issue.title || category.name}</div>
+                            {issue.description && (
+                              <div className="alert-subtitle">
+                                {issue.description.length > 50
+                                  ? issue.description.substring(0, 50) + '...'
+                                  : issue.description}
+                              </div>
+                            )}
+                            <div className="alert-time">{getTimeAgo(issue.createdAt)}</div>
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* REPORT TAB */}
+          {activeTab === 'report' && (
+            <div className="tab-content">
+              <div className="report-instructions">
+                <div className="instruction-card">
+                  <Target size={48} className="instruction-icon" />
+                  <h3>{t('reportIssue', language)}</h3>
+                  <p>{t('reportingHint', language)}</p>
                 </div>
               </div>
 
-              <div className="legend-toggle">
-                <button
-                  className="legend-toggle-btn"
-                  onClick={() => setShowLegend(!showLegend)}
-                >
-                  <BarChart3 size={20} />
-                  <span>{showLegend ? t('hideLegend', language) : t('showLegend', language)}</span>
-                </button>
-              </div>
-
-              {showLegend && <MapLegend language={language} />}
-
-              {!reportingMode ? (
-                <div className="map-hint">
-                  <Lightbulb size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
-                  {t('mapHint', language)}
-                </div>
-              ) : (
-                <div className="map-hint-warning">
-                  <Target size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
-                  <strong>{t('reportingHint', language)}</strong>
+              {/* User Reported Issues */}
+              {userReports.length > 0 && (
+                <div className="alerts-section">
+                  <h2 className="section-title">{t('yourReports', language)} ({userReports.length})</h2>
+                  <div className="user-reports-list">
+                    {userReports.map(report => (
+                      <div
+                        key={report.id}
+                        className={`alert-card alert-${report.type}`}
+                        onClick={() => handleIssueClick(report)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="alert-icon">
+                          {getReportTypeIcon(report.type, 32)}
+                        </div>
+                        <div className="alert-content">
+                          <div className="alert-title">{report.title}</div>
+                          {report.description && <div className="alert-subtitle">{report.description}</div>}
+                          <div className="alert-time">
+                            {new Date(report.timestamp).toLocaleString()} • {report.status}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
+          )}
 
-            {/* Latest Alerts Section */}
-            <div className="alerts-section">
-              <h2 className="section-title">{t('latestAlerts', language)}</h2>
-              <div className="alerts-list">
-                {latestIssues.length === 0 ? (
-                  <div style={{
-                    textAlign: 'center',
-                    padding: '40px 20px',
-                    color: '#6b7280',
-                    fontSize: '14px'
-                  }}>
-                    No recent issues reported
-                  </div>
-                ) : (
-                  latestIssues.map(issue => {
-                    const category = issueCategories.find(cat => cat.id === issue.type) || issueCategories[0]
-                    return (
-                      <div
-                        key={issue.id}
-                        className={`alert-card alert-${issue.type}`}
-                        onClick={() => handleIssueClick(issue)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="alert-icon">{getReportTypeIcon(issue.type, 32)}</div>
-                        <div className="alert-content">
-                          <div className="alert-title">{issue.title || category.name}</div>
-                          {issue.description && (
-                            <div className="alert-subtitle">
-                              {issue.description.length > 50
-                                ? issue.description.substring(0, 50) + '...'
-                                : issue.description}
-                            </div>
-                          )}
-                          <div className="alert-time">{getTimeAgo(issue.createdAt)}</div>
-                        </div>
-                      </div>
-                    )
-                  })
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* REPORT TAB */}
-        {activeTab === 'report' && (
-          <div className="tab-content">
-            <div className="report-instructions">
-              <div className="instruction-card">
-                <Target size={48} className="instruction-icon" />
-                <h3>{t('reportIssue', language)}</h3>
-                <p>{t('reportingHint', language)}</p>
-              </div>
-            </div>
-
-            {/* User Reported Issues */}
-            {userReports.length > 0 && (
+          {/* ISSUES TAB */}
+          {activeTab === 'issues' && (
+            <div className="tab-content">
               <div className="alerts-section">
-                <h2 className="section-title">{t('yourReports', language)} ({userReports.length})</h2>
-                <div className="user-reports-list">
-                  {userReports.map(report => (
-                    <div
-                      key={report.id}
-                      className={`alert-card alert-${report.type}`}
-                      onClick={() => handleIssueClick(report)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <div className="alert-icon">
-                        {getReportTypeIcon(report.type, 32)}
-                      </div>
-                      <div className="alert-content">
-                        <div className="alert-title">{report.title}</div>
-                        {report.description && <div className="alert-subtitle">{report.description}</div>}
-                        <div className="alert-time">
-                          {new Date(report.timestamp).toLocaleString()} • {report.status}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <h2 className="section-title">{t('allIssues', language)}</h2>
+                <IssuesList onIssueClick={handleIssueClick} />
               </div>
-            )}
-          </div>
-        )}
-
-        {/* ISSUES TAB */}
-        {activeTab === 'issues' && (
-          <div className="tab-content">
-            <div className="alerts-section">
-              <h2 className="section-title">{t('allIssues', language)}</h2>
-              <IssuesList onIssueClick={handleIssueClick} />
             </div>
-          </div>
-        )}
+          )}
+        </BottomSheet>
+      )}
 
-        {/* LEADERBOARD TAB */}
-        {activeTab === 'leaderboard' && (
-          <div className="tab-content">
-            <Leaderboard />
-          </div>
-        )}
+      {/* Full Screen Content - For tabs without map (leaderboard, profile, admin) */}
+      {(activeTab === 'leaderboard' || activeTab === 'profile' || activeTab === 'admin') && (
+        <div className="full-screen-content">
+          {/* LEADERBOARD TAB */}
+          {activeTab === 'leaderboard' && (
+            <div className="tab-content">
+              <Leaderboard />
+            </div>
+          )}
 
-        {/* PROFILE TAB */}
-        {activeTab === 'profile' && (
-          <div className="tab-content">
-            <div className="profile-section">
-              <div className="profile-card">
-                <div className="profile-avatar">
-                  <MapPin size={48} />
-                </div>
-                <h3>{currentUser.displayName || 'User'}</h3>
-                <p className="profile-subtitle">{currentUser.email}</p>
-                {isAdmin() && (
-                  <div style={{
-                    marginTop: '8px',
-                    padding: '4px 12px',
-                    background: '#fbbf24',
-                    color: '#78350f',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: '600'
-                  }}>
-                    ADMIN
+          {/* PROFILE TAB */}
+          {activeTab === 'profile' && (
+            <div className="tab-content">
+              <div className="profile-section">
+                <div className="profile-card">
+                  <div className="profile-avatar">
+                    <MapPin size={48} />
                   </div>
+                  <h3>{currentUser.displayName || 'User'}</h3>
+                  <p className="profile-subtitle">{currentUser.email}</p>
+                  {isAdmin() && (
+                    <div style={{
+                      marginTop: '8px',
+                      padding: '4px 12px',
+                      background: '#fbbf24',
+                      color: '#78350f',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: '600'
+                    }}>
+                      ADMIN
+                    </div>
+                  )}
+                </div>
+
+                <div className="stats-grid">
+                  <div className="stat-card">
+                    <div className="stat-number">{userPoints.points}</div>
+                    <div className="stat-label">Points</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-number">{userReports.length}</div>
+                    <div className="stat-label">{t('yourReports', language)}</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-number">{favorites.length}</div>
+                    <div className="stat-label">{t('favorite', language)}</div>
+                  </div>
+                </div>
+
+                {isAdmin() && (
+                  <button
+                    onClick={() => setActiveTab('admin')}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      background: '#0098a3',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <Shield size={20} />
+                    Admin Panel
+                  </button>
                 )}
-              </div>
 
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-number">{userPoints.points}</div>
-                  <div className="stat-label">Points</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-number">{userReports.length}</div>
-                  <div className="stat-label">{t('yourReports', language)}</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-number">{favorites.length}</div>
-                  <div className="stat-label">{t('favorite', language)}</div>
-                </div>
-              </div>
-
-              {isAdmin() && (
                 <button
-                  onClick={() => setActiveTab('admin')}
+                  onClick={handleLogout}
                   style={{
                     width: '100%',
                     padding: '12px',
-                    background: '#0098a3',
+                    background: '#ef4444',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '16px',
                     fontWeight: '600',
                     cursor: 'pointer',
-                    marginBottom: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px'
+                    marginBottom: '16px'
                   }}
                 >
-                  <Shield size={20} />
-                  Admin Panel
+                  Sign Out
                 </button>
-              )}
 
-              <button
-                onClick={handleLogout}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  background: '#ef4444',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  marginBottom: '16px'
-                }}
-              >
-                Sign Out
-              </button>
+                <div className="settings-section">
+                  <h3 className="section-title">Settings</h3>
 
-              <div className="settings-section">
-                <h3 className="section-title">Settings</h3>
-
-                <div className="setting-item">
-                  <span style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-                    <BellIcon />
-                    <p>
-                      Traffic Notifications
-                    </p>
-                  </span>
-                  <button
-                    onClick={async () => {
-                      if (notificationsEnabled) {
-                        alert('Notifications are enabled. To disable, go to browser settings.');
-                      } else {
-                        const permission = await requestNotificationPermission();
-                        if (permission === 'granted') {
-                          setNotificationsEnabled(true);
-                          showNotification('Notifications Enabled', {
-                            body: 'You\'ll receive traffic alerts for your saved routes'
-                          });
+                  <div className="setting-item">
+                    <span style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+                      <BellIcon />
+                      <p>
+                        Traffic Notifications
+                      </p>
+                    </span>
+                    <button
+                      onClick={async () => {
+                        if (notificationsEnabled) {
+                          alert('Notifications are enabled. To disable, go to browser settings.');
+                        } else {
+                          const permission = await requestNotificationPermission();
+                          if (permission === 'granted') {
+                            setNotificationsEnabled(true);
+                            showNotification('Notifications Enabled', {
+                              body: 'You\'ll receive traffic alerts for your saved routes'
+                            });
+                          }
                         }
-                      }
-                    }}
-                    style={{
-                      padding: '6px 12px',
-                      background: notificationsEnabled ? '#10b981' : '#6b7280',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {notificationsEnabled ? 'Enabled ✓' : 'Disabled'}
-                  </button>
-                </div>
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        background: notificationsEnabled ? '#10b981' : '#6b7280',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {notificationsEnabled ? 'Enabled ✓' : 'Disabled'}
+                    </button>
+                  </div>
 
-                <div className="setting-item">
-                  <span>Language</span>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="language-select"
-                  >
-                    <option value="English">English</option>
-                    <option value="Kinyarwanda">Kinyarwanda</option>
-                    <option value="French">Français</option>
-                  </select>
+                  <div className="setting-item">
+                    <span>Language</span>
+                    <select
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      className="language-select"
+                    >
+                      <option value="English">English</option>
+                      <option value="Kinyarwanda">Kinyarwanda</option>
+                      <option value="French">Français</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ADMIN TAB */}
-        {activeTab === 'admin' && isAdmin() && (
-          <div className="tab-content">
-            <AdminPanel onClose={() => setActiveTab('home')} />
-          </div>
-        )}
-      </BottomSheet>
+          {/* ADMIN TAB */}
+          {activeTab === 'admin' && isAdmin() && (
+            <div className="tab-content">
+              <AdminPanel onClose={() => setActiveTab('home')} />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Bottom Navigation */}
       <BottomNav

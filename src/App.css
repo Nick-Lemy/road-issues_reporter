@@ -886,10 +886,15 @@ body {
 }
 
 .map-controls {
+  position: fixed;
+  bottom: 80px; /* Above bottom nav */
+  left: 16px;
+  right: 16px;
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
   flex-wrap: wrap;
+  z-index: 350;
+  justify-content: center;
 }
 
 .map-control-btn {
@@ -1505,6 +1510,14 @@ body {
   max-width: 320px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
     sans-serif;
+  position: fixed !important;
+  top: auto !important;
+  bottom: 90px !important; /* Above bottom nav */
+  right: 16px !important;
+  left: auto !important;
+  z-index: 300;
+  max-height: 300px;
+  overflow: auto;
 }
 
 .leaflet-routing-container h2 {
@@ -1576,6 +1589,13 @@ body {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;
+  position: fixed !important;
+  top: auto !important;
+  bottom: 90px !important; /* Above bottom nav */
+  right: 16px !important;
+  left: auto !important;
+  max-width: 320px;
+  z-index: 300;
 }
 
 /* Show only for main navigation routing */
@@ -1734,11 +1754,19 @@ body {
 
 /* Route summary header in routing panel */
 .route-summary-header {
+  position: fixed !important;
+  bottom: 90px; /* Above bottom nav */
+  right: 16px;
+  left: auto !important;
+  width: auto !important;
+  max-width: 320px;
   padding: 12px;
   background: linear-gradient(135deg, #e6f7f8 0%, #b3e5ea 100%);
-  border-bottom: 3px solid #0098a3;
-  margin: -12px -12px 12px -12px;
-  border-radius: 12px 12px 0 0;
+  border: 3px solid #0098a3;
+  margin: 0 !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 300;
 }
 
 .route-summary-header > div:first-child {
@@ -2594,4 +2622,36 @@ body {
 
 .bottom-nav {
   z-index: 1500 !important;
+}
+
+/* Floating Search Bar */
+.floating-search-bar {
+  position: fixed;
+  top: 68px; /* Just below the header */
+  left: 16px;
+  right: 16px;
+  z-index: 400;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+}
+
+/* Full Screen Content - For pages without map */
+.full-screen-content {
+  position: fixed;
+  top: 68px; /* Below header */
+  left: 0;
+  right: 0;
+  bottom: 70px; /* Above bottom nav */
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #f9fafb;
+  -webkit-overflow-scrolling: touch;
+}
+
+.full-screen-content .tab-content {
+  padding: 20px;
+  max-width: 100%;
+  height: 100%;
 }
