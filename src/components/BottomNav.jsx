@@ -5,7 +5,6 @@ export default function BottomNav({ activeTab, onTabChange, language }) {
     const tabs = [
         { id: 'home', icon: Home, label: t('navHome', language) },
         { id: 'report', icon: AlertTriangle, label: t('navReport', language) },
-        { id: 'issues', icon: List, label: t('navIssues', language) },
         { id: 'leaderboard', icon: Trophy, label: 'Ranking' },
         { id: 'profile', icon: User, label: t('navProfile', language) }
     ]

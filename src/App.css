@@ -289,9 +289,8 @@ body {
 .bottom-nav {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 600px;
+  left: 0;
+  right: 0;
   width: 100%;
   background: white;
   border-top: 1px solid #e5e7eb;
@@ -742,11 +741,16 @@ body {
 
 /* Map */
 #map {
-  height: 280px;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-  z-index: 10;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100vh !important;
+  width: 100vw !important;
+  z-index: 1;
+  border-radius: 0;
+  border: none;
 }
 
 /* Alerts Section */
@@ -881,10 +885,15 @@ body {
 }
 
 .map-controls {
+  position: fixed;
+  bottom: 80px; /* Above bottom nav */
+  left: 16px;
+  right: 16px;
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
   flex-wrap: wrap;
+  z-index: 350;
+  justify-content: center;
 }
 
 .map-control-btn {
@@ -1494,47 +1503,64 @@ body {
 /* Leaflet Routing Machine Overrides */
 .leaflet-routing-container {
   background: white;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  max-width: 320px;
+  padding: 8px !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  max-width: 240px !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
     sans-serif;
+  position: fixed !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  bottom: auto !important;
+  right: 12px !important;
+  left: auto !important;
+  z-index: 1100 !important;
+  max-height: 180px !important;
+  overflow: auto;
+  font-size: 12px !important;
 }
 
 .leaflet-routing-container h2 {
-  font-size: 18px;
+  font-size: 13px !important;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 12px;
+  margin-bottom: 6px !important;
 }
 
 .leaflet-routing-container h3 {
-  font-size: 20px;
+  font-size: 13px !important;
   font-weight: 700;
   color: #0098a3;
-  margin: 8px 0;
+  margin: 4px 0 !important;
 }
 
 /* Time and distance display styling */
 .leaflet-routing-container .leaflet-routing-alt h3 {
-  font-size: 22px;
+  font-size: 14px !important;
   font-weight: 700;
   color: #1f2937;
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 4px;
 }
 
 .leaflet-routing-container .leaflet-routing-alt span {
-  font-size: 14px;
+  font-size: 11px !important;
   color: #6b7280;
   font-weight: 500;
 }
 
+/* Make icon smaller */
+.leaflet-routing-container .leaflet-routing-alt svg,
+.leaflet-routing-container .leaflet-routing-alt img {
+  width: 14px !important;
+  height: 14px !important;
+}
+
 .leaflet-routing-container.leaflet-bar {
   border: none;
-  padding: 16px;
+  padding: 8px !important;
 }
 
 /* Hide turn-by-turn instructions but show summary */
@@ -1543,12 +1569,12 @@ body {
 }
 
 .leaflet-routing-alt {
-  padding: 14px;
+  padding: 6px !important;
   border-bottom: 1px solid #e5e7eb;
   cursor: pointer;
   transition: all 0.2s;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  border-radius: 6px;
+  margin-bottom: 4px;
 }
 
 .leaflet-routing-alt:last-child {
@@ -1571,6 +1597,17 @@ body {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;
+  position: fixed !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  bottom: auto !important;
+  right: 12px !important;
+  left: auto !important;
+  max-width: 240px !important;
+  max-height: 180px !important;
+  z-index: 1100 !important;
+  font-size: 12px !important;
+  padding: 8px !important;
 }
 
 /* Show only for main navigation routing */
@@ -1584,7 +1621,7 @@ body {
 
 /* Make routing panel always visible and prominent */
 .routing-panel-visible {
-  opacity: 1 !important;
+  opacity: 10 !important;
   pointer-events: all !important;
   position: relative !important;
   z-index: 1000 !important;
@@ -1613,7 +1650,7 @@ body {
 
 /* Make route header more prominent */
 .routing-panel-visible .leaflet-routing-alt h3 {
-  font-size: 20px !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
   color: #1f2937 !important;
   display: flex !important;
@@ -1623,15 +1660,15 @@ body {
 
 .routing-panel-visible .leaflet-routing-alt h3::before {
   content: "🚗";
-  font-size: 22px;
+  font-size: 12px;
 }
 
 /* Google Maps-style Route Summary */
 .route-summary-custom {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  padding: 12px 16px;
+  /* gap: 8px; */
+  /* padding: 12px 16px; */
   background: white;
   border-radius: 8px;
   margin-bottom: 8px;
@@ -1729,20 +1766,31 @@ body {
 
 /* Route summary header in routing panel */
 .route-summary-header {
-  padding: 12px;
+  position: fixed !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  bottom: auto !important;
+  right: 12px !important;
+  left: auto !important;
+  width: auto !important;
+  max-width: 240px !important;
+  padding: 6px 8px !important;
   background: linear-gradient(135deg, #e6f7f8 0%, #b3e5ea 100%);
-  border-bottom: 3px solid #0098a3;
-  margin: -12px -12px 12px -12px;
-  border-radius: 12px 12px 0 0;
+  border: 2px solid #0098a3;
+  margin: 0 !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1100 !important;
+  font-size: 12px !important;
 }
 
 .route-summary-header > div:first-child {
-  font-size: 11px;
-  letter-spacing: 0.5px;
+  font-size: 9px !important;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
   color: #007580;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 3px !important;
 }
 
 /* Route penalty badge */
@@ -2528,4 +2576,97 @@ body {
   .stat-label {
     font-size: 10px;
   }
+}
+
+/* Bottom Sheet Styles */
+.bottom-sheet-container {
+  position: fixed;
+  bottom: 70px; /* Above bottom nav */
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bottom-sheet-handle {
+  padding: 12px 0;
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.bottom-sheet-handle:active {
+  cursor: grabbing;
+}
+
+.bottom-sheet-grip {
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-sheet-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-header {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500 !important;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.bottom-nav {
+  z-index: 1500 !important;
+}
+
+/* Floating Search Bar */
+.floating-search-bar {
+  position: fixed;
+  top: 68px; /* Just below the header */
+  left: 16px;
+  right: 16px;
+  z-index: 400;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+}
+
+/* Full Screen Content - For pages without map */
+.full-screen-content {
+  position: fixed;
+  top: 68px; /* Below header */
+  left: 0;
+  right: 0;
+  bottom: 70px; /* Above bottom nav */
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #f9fafb;
+  -webkit-overflow-scrolling: touch;
+}
+
+.full-screen-content .tab-content {
+  padding: 20px;
+  max-width: 100%;
+  height: 100%;
 }
