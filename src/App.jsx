@@ -308,8 +308,8 @@ function AppContent() {
         </div>
       )}
 
-      {/* Full Screen Map - Visible only on home, report, and issues tabs */}
-      {(activeTab === 'home' || activeTab === 'report' || activeTab === 'issues') && (
+      {/* Full Screen Map - Visible only on home and report tabs */}
+      {(activeTab === 'home' || activeTab === 'report') && (
         <Map
           onIssueSelect={handleIssueClick}
           reportingMode={reportingMode || activeTab === 'report'}
@@ -333,7 +333,7 @@ function AppContent() {
       )}
 
       {/* Draggable Bottom Sheet - Only for tabs with map */}
-      {(activeTab === 'home' || activeTab === 'report' || activeTab === 'issues') && (
+      {(activeTab === 'home' || activeTab === 'report') && (
         <BottomSheet minHeight={120} maxHeight={window.innerHeight - 140}>
 
           {/* HOME TAB */}
@@ -504,12 +504,8 @@ function AppContent() {
                   </div>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* ISSUES TAB */}
-          {activeTab === 'issues' && (
-            <div className="tab-content">
+              {/* All Issues */}
               <div className="alerts-section">
                 <h2 className="section-title">{t('allIssues', language)}</h2>
                 <IssuesList onIssueClick={handleIssueClick} />
