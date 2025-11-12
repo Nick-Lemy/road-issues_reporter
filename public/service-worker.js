@@ -1,5 +1,6 @@
 // Service Worker for Dryvupp PWA
-const CACHE_NAME = 'dryvupp-v1';
+const CACHE_VERSION = 'v2.0.0'; // Increment this to force cache refresh
+const CACHE_NAME = `dryvupp-${CACHE_VERSION}`;
 const urlsToCache = [
     '/',
     '/index.html',
@@ -8,20 +9,23 @@ const urlsToCache = [
 
 // Install event - cache essential files
 self.addEventListener('install', (event) => {
-    console.log('[Service Worker] Installing...');
+    console.log('[Service Worker] Installing version:', CACHE_VERSION);
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
                 console.log('[Service Worker] Caching app shell');
                 return cache.addAll(urlsToCache);
             })
-            .then(() => self.skipWaiting())
+            .then(() => {
+                console.log('[Service Worker] Skip waiting - activate immediately');
+                return self.skipWaiting();
+            })
     );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-    console.log('[Service Worker] Activating...');
+    console.log('[Service Worker] Activating version:', CACHE_VERSION);
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
@@ -32,17 +36,51 @@ self.addEventListener('activate', (event) => {
                     }
                 })
             );
-        }).then(() => self.clients.claim())
+        }).then(() => {
+            console.log('[Service Worker] Claiming clients');
+            return self.clients.claim();
+        }).then(() => {
+            // Notify all clients about the update
+            return self.clients.matchAll().then((clients) => {
+                clients.forEach((client) => {
+                    client.postMessage({
+                        type: 'CACHE_UPDATED',
+                        version: CACHE_VERSION
+                    });
+                });
+            });
+        })
     );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - Network first, then cache for API calls, Cache first for static assets
 self.addEventListener('fetch', (event) => {
     // Skip cross-origin requests
     if (!event.request.url.startsWith(self.location.origin)) {
         return;
     }
 
+    // For HTML requests, use network first strategy to get updates
+    if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    // Clone and cache the response
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache);
+                    });
+                    return response;
+                })
+                .catch(() => {
+                    // Fallback to cache if network fails
+                    return caches.match(event.request);
+                })
+        );
+        return;
+    }
+
+    // For other requests, use cache first strategy
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
@@ -102,6 +140,6 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
     event.waitUntil(
-        clients.openWindow('/')
+        self.clients.openWindow('/')
     );
 });

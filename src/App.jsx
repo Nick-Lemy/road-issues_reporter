@@ -81,6 +81,42 @@ function AppContent() {
   const [allActiveIssues, setAllActiveIssues] = useState([])
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [userPoints, setUserPoints] = useState({ points: 0, issuesReported: 0 })
+  const [showUpdatePrompt, setShowUpdatePrompt] = useState(false)
+
+  // Check for service worker updates and handle cache refresh
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      // Listen for messages from service worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'CACHE_UPDATED') {
+          console.log('Cache updated to version:', event.data.version)
+          setShowUpdatePrompt(true)
+        }
+      })
+
+      // Check for updates every 5 minutes
+      const checkForUpdates = () => {
+        navigator.serviceWorker.getRegistration().then((registration) => {
+          if (registration) {
+            registration.update()
+          }
+        })
+      }
+
+      // Check immediately
+      checkForUpdates()
+
+      // Then check every 5 minutes
+      const interval = setInterval(checkForUpdates, 5 * 60 * 1000)
+
+      return () => clearInterval(interval)
+    }
+  }, [])
+
+  const handleRefreshApp = () => {
+    setShowUpdatePrompt(false)
+    window.location.reload()
+  }
 
   // Request notification permission on mount
   useEffect(() => {
@@ -688,6 +724,24 @@ function AppContent() {
         onCategoryChange={handleCategoryChange}
         selectedCategory={reportCategory}
       />
+
+      {/* Update Prompt */}
+      {showUpdatePrompt && (
+        <div className="update-prompt-overlay">
+          <div className="update-prompt">
+            <h3>🚀 New Update Available!</h3>
+            <p>A new version of Dryvupp is available. Refresh to get the latest features and improvements.</p>
+            <div className="update-prompt-actions">
+              <button onClick={handleRefreshApp} className="btn-primary">
+                Refresh Now
+              </button>
+              <button onClick={() => setShowUpdatePrompt(false)} className="btn-secondary">
+                Later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
