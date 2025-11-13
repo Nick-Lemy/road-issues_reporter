@@ -21,7 +21,11 @@ export default function SearchBar({ onSelect, language = 'English' }) {
             try {
                 if (abortRef.current) abortRef.current.abort()
                 abortRef.current = new AbortController()
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=6`;
+                // Restrict search to Kigali area: viewbox=left,top,right,bottom (lon,lat,lon,lat)
+                // Kigali bounds: approximately 29.95,2.05,30.25,-1.85 (wider area around Kigali)
+                const viewbox = '29.95,-1.85,30.25,-2.05'
+                const bounded = 1 // Restrict results to viewbox
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=6&viewbox=${viewbox}&bounded=${bounded}`;
                 const res = await fetch(url, { signal: abortRef.current.signal, headers: { 'Accept-Language': 'en' } })
                 const data = await res.json()
                 setResults(data)

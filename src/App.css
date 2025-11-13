@@ -2642,14 +2642,14 @@ body {
 /* Floating Search Bar */
 .floating-search-bar {
   position: fixed;
-  top: 68px; /* Just below the header */
+  top: 10px; /* Just below the header */
   left: 16px;
   right: 16px;
   z-index: 400;
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  padding: 12px;
+  padding: 8px;
 }
 
 /* Full Screen Content - For pages without map */
@@ -2725,4 +2725,418 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ===== DARK MODE STYLES ===== */
+body.dark-mode {
+  background-color: #0f1419;
+  color: #e7e9ea;
+}
+
+body.dark-mode #root {
+  background-color: #16191e;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .app-container {
+  background-color: #16191e;
+}
+
+/* Bottom Nav */
+body.dark-mode .bottom-nav {
+  background: #1e2329;
+  border-top-color: #2f3336;
+}
+
+body.dark-mode .nav-item {
+  color: #71767b;
+}
+
+body.dark-mode .nav-item.active {
+  color: #0098a3;
+}
+
+body.dark-mode .nav-item:hover {
+  color: #e7e9ea;
+}
+
+/* Bottom Sheet */
+body.dark-mode .bottom-sheet {
+  background-color: #16191e;
+}
+
+body.dark-mode .bottom-sheet-handle {
+  background-color: #3e4347;
+}
+
+/* Search Bar */
+body.dark-mode .search-bar {
+  background-color: #1e2329;
+}
+
+body.dark-mode .search-input-wrap {
+  background-color: #2a2e35;
+  border-color: #3e4347;
+}
+
+body.dark-mode .search-input-wrap input {
+  background-color: transparent;
+  color: #e7e9ea;
+}
+
+body.dark-mode .search-input-wrap input::placeholder {
+  color: #71767b;
+}
+
+body.dark-mode .search-icon {
+  color: #71767b;
+}
+
+body.dark-mode .search-results {
+  background-color: #1e2329;
+  border-color: #3e4347;
+}
+
+body.dark-mode .search-result {
+  border-bottom-color: #2f3336;
+  color: #e7e9ea;
+}
+
+body.dark-mode .search-result:hover,
+body.dark-mode .search-result.active {
+  background-color: #2a2e35;
+}
+
+body.dark-mode .result-content .result-name {
+  color: #e7e9ea;
+}
+
+body.dark-mode .result-content .result-address {
+  color: #71767b;
+}
+
+/* Sections */
+body.dark-mode .content-section {
+  background-color: #16191e;
+}
+
+body.dark-mode .section-title {
+  color: #e7e9ea;
+}
+
+body.dark-mode .subtitle {
+  color: #71767b;
+}
+
+/* Cards */
+body.dark-mode .issue-card,
+body.dark-mode .favorite-card,
+body.dark-mode .stat-card {
+  background-color: #1e2329;
+  border-color: #2f3336;
+}
+
+body.dark-mode .issue-card:hover,
+body.dark-mode .favorite-card:hover {
+  background-color: #2a2e35;
+}
+
+body.dark-mode .issue-header h3,
+body.dark-mode .favorite-header h3 {
+  color: #e7e9ea;
+}
+
+body.dark-mode .issue-description,
+body.dark-mode .favorite-description {
+  color: #a1a5aa;
+}
+
+body.dark-mode .issue-footer,
+body.dark-mode .favorite-footer {
+  color: #71767b;
+  border-top-color: #2f3336;
+}
+
+/* Buttons */
+body.dark-mode button {
+  background-color: #1e2329;
+  color: #e7e9ea;
+  border-color: #3e4347;
+}
+
+body.dark-mode button:hover:not(:disabled) {
+  background-color: #2a2e35;
+}
+
+body.dark-mode .btn-primary {
+  background-color: #0098a3;
+  color: white;
+  border: none;
+}
+
+body.dark-mode .btn-primary:hover {
+  background-color: #007b84;
+}
+
+body.dark-mode .btn-danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+body.dark-mode .btn-danger:hover {
+  background-color: #dc2626;
+}
+
+/* Modals */
+body.dark-mode .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+body.dark-mode .modal-content {
+  background-color: #1e2329;
+  color: #e7e9ea;
+}
+
+body.dark-mode .modal-header {
+  border-bottom-color: #2f3336;
+}
+
+body.dark-mode .modal-header h2 {
+  color: #e7e9ea;
+}
+
+body.dark-mode .modal-close {
+  color: #71767b;
+}
+
+body.dark-mode .modal-close:hover {
+  color: #e7e9ea;
+  background-color: #2a2e35;
+}
+
+/* Forms */
+body.dark-mode input[type="text"],
+body.dark-mode input[type="email"],
+body.dark-mode input[type="password"],
+body.dark-mode textarea,
+body.dark-mode select {
+  background-color: #2a2e35;
+  border-color: #3e4347;
+  color: #e7e9ea;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #71767b;
+}
+
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+  border-color: #0098a3;
+  background-color: #1e2329;
+}
+
+/* Settings */
+body.dark-mode .settings-section {
+  background-color: #16191e;
+}
+
+body.dark-mode .setting-item {
+  background-color: #1e2329;
+  border-color: #2f3336;
+}
+
+body.dark-mode .setting-item p {
+  color: #e7e9ea;
+}
+
+body.dark-mode .language-select {
+  background-color: #2a2e35;
+  border-color: #3e4347;
+  color: #e7e9ea;
+}
+
+/* Leaderboard */
+body.dark-mode .leaderboard-header {
+  background: linear-gradient(135deg, #0098a3 0%, #006b73 100%);
+}
+
+body.dark-mode .leaderboard-item {
+  background-color: #1e2329;
+  border-color: #2f3336;
+}
+
+body.dark-mode .leaderboard-item:hover {
+  background-color: #2a2e35;
+}
+
+body.dark-mode .leaderboard-item .name {
+  color: #e7e9ea;
+}
+
+body.dark-mode .leaderboard-item .email {
+  color: #71767b;
+}
+
+/* Map Legend */
+body.dark-mode .map-legend {
+  background-color: #1e2329;
+  border-color: #3e4347;
+}
+
+body.dark-mode .legend-title {
+  color: #e7e9ea;
+  border-bottom-color: #2f3336;
+}
+
+body.dark-mode .legend-item {
+  color: #e7e9ea;
+}
+
+body.dark-mode .legend-item-header {
+  color: #e7e9ea;
+}
+
+body.dark-mode .legend-item-description {
+  color: #71767b;
+}
+
+/* Route Info */
+body.dark-mode .leaflet-routing-container {
+  background-color: #1e2329 !important;
+  border-color: #2f3336 !important;
+  color: #e7e9ea !important;
+}
+
+body.dark-mode .route-summary-header {
+  background-color: #2a2e35 !important;
+  border-bottom-color: #0098a3 !important;
+  color: #e7e9ea !important;
+}
+
+body.dark-mode .leaflet-routing-alt,
+body.dark-mode .leaflet-routing-alt-minimized {
+  background-color: #1e2329 !important;
+  border-color: #3e4347 !important;
+  color: #e7e9ea !important;
+}
+
+body.dark-mode .leaflet-routing-alt:hover {
+  background-color: #2a2e35 !important;
+}
+
+/* Update Prompt */
+body.dark-mode .update-prompt {
+  background-color: #1e2329;
+  border-color: #3e4347;
+  color: #e7e9ea;
+}
+
+body.dark-mode .update-prompt h3 {
+  color: #e7e9ea;
+}
+
+body.dark-mode .update-prompt button {
+  background-color: #0098a3;
+  color: white;
+}
+
+body.dark-mode .update-prompt button:last-child {
+  background-color: #2a2e35;
+  color: #71767b;
+}
+
+/* Stat Cards */
+body.dark-mode .stat-label {
+  color: #71767b;
+}
+
+body.dark-mode .stat-value {
+  color: #e7e9ea;
+}
+
+/* Loading States */
+body.dark-mode .loading {
+  color: #71767b;
+}
+
+body.dark-mode .no-results {
+  color: #71767b;
+}
+
+/* Issue Report Modal */
+body.dark-mode .category-grid {
+  background-color: transparent;
+}
+
+body.dark-mode .category-option {
+  background-color: #1e2329;
+  border-color: #3e4347;
+}
+
+body.dark-mode .category-option.active {
+  background-color: #0098a3;
+  border-color: #0098a3;
+}
+
+body.dark-mode .category-option:hover:not(.active) {
+  background-color: #2a2e35;
+}
+
+/* Admin Panel */
+body.dark-mode .admin-panel {
+  background-color: #16191e;
+}
+
+body.dark-mode .admin-header {
+  background: linear-gradient(135deg, #0098a3 0%, #006b73 100%);
+}
+
+body.dark-mode .admin-stats {
+  background-color: #1e2329;
+  border-color: #2f3336;
+}
+
+/* Login Page */
+body.dark-mode .login-container {
+  background: linear-gradient(135deg, #0f1419 0%, #16191e 100%);
+}
+
+body.dark-mode .login-card {
+  background-color: #1e2329;
+  border-color: #2f3336;
+}
+
+body.dark-mode .login-title {
+  color: #e7e9ea;
+}
+
+body.dark-mode .login-input {
+  background-color: #2a2e35;
+  border-color: #3e4347;
+  color: #e7e9ea;
+}
+
+body.dark-mode .login-input:focus {
+  border-color: #0098a3;
+}
+
+/* Scrollbar */
+body.dark-mode ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+body.dark-mode ::-webkit-scrollbar-track {
+  background-color: #16191e;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background-color: #3e4347;
+  border-radius: 4px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background-color: #4a4f54;
 }

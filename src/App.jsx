@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin, Globe, LogIn, LogOut, Shield, BellIcon } from 'lucide-react'
+import { BarChart3, AlertTriangle, X, Lightbulb, Target, Construction, Ban, AlertOctagon, Car, Pickaxe, Droplet, Blocks, MapPin, LogIn, LogOut, Shield, BellIcon, Moon, Sun } from 'lucide-react'
 import Map from './components/Map'
 import SearchBar from './components/SearchBar'
 import SplashScreen from './components/SplashScreen'
@@ -65,7 +65,6 @@ function AppContent() {
   const [showSplash, setShowSplash] = useState(true)
   const [activeTab, setActiveTab] = useState('home')
   const [language, setLanguage] = useState('English')
-  const [showLanguageMenu, setShowLanguageMenu] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [showLegend, setShowLegend] = useState(false)
   const [reportingMode, setReportingMode] = useState(false)
@@ -82,6 +81,20 @@ function AppContent() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [userPoints, setUserPoints] = useState({ points: 0, issuesReported: 0 })
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false)
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode')
+    return saved === 'true'
+  })
+
+  // Apply dark mode class to body and persist to localStorage
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add('dark-mode')
+    } else {
+      document.body.classList.remove('dark-mode')
+    }
+    localStorage.setItem('darkMode', darkMode)
+  }, [darkMode])
 
   // Check for service worker updates and handle cache refresh
   useEffect(() => {
@@ -282,68 +295,6 @@ function AppContent() {
 
   return (
     <div className="app-container">
-      {/* Mobile Header */}
-      <header className="mobile-header">
-        <div className="header-logo-container">
-          <img
-            src="/icons/icon-96x96.png"
-            alt="Dryvupp Logo"
-            className="header-logo"
-          />
-          <h1 className="mobile-header-title">{t('appTitle', language)}</h1>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {isAdmin() && (
-            <button
-              className="language-btn"
-              onClick={() => setActiveTab('admin')}
-              title="Admin Panel"
-            >
-              <Shield size={24} />
-            </button>
-          )}
-          <button
-            className="language-btn"
-            onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-          >
-            <Globe size={24} />
-          </button>
-        </div>
-      </header>
-
-      {/* Language Menu Dropdown */}
-      {showLanguageMenu && (
-        <div className="language-menu">
-          <button
-            className={`language-menu-item ${language === 'English' ? 'active' : ''}`}
-            onClick={() => {
-              setLanguage('English')
-              setShowLanguageMenu(false)
-            }}
-          >
-            English
-          </button>
-          <button
-            className={`language-menu-item ${language === 'Kinyarwanda' ? 'active' : ''}`}
-            onClick={() => {
-              setLanguage('Kinyarwanda')
-              setShowLanguageMenu(false)
-            }}
-          >
-            Kinyarwanda
-          </button>
-          <button
-            className={`language-menu-item ${language === 'French' ? 'active' : ''}`}
-            onClick={() => {
-              setLanguage('French')
-              setShowLanguageMenu(false)
-            }}
-          >
-            Français
-          </button>
-        </div>
-      )}
-
       {/* Full Screen Map - Visible only on home and report tabs */}
       {(activeTab === 'home' || activeTab === 'report') && (
         <Map
@@ -646,6 +597,27 @@ function AppContent() {
 
                 <div className="settings-section">
                   <h3 className="section-title">Settings</h3>
+
+                  <div className="setting-item">
+                    <span style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+                      {darkMode ? <Moon size={20} /> : <Sun size={20} />}
+                      <p>Dark Mode</p>
+                    </span>
+                    <button
+                      onClick={() => setDarkMode(!darkMode)}
+                      style={{
+                        padding: '6px 12px',
+                        background: darkMode ? '#10b981' : '#6b7280',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {darkMode ? 'Enabled ✓' : 'Disabled'}
+                    </button>
+                  </div>
 
                   <div className="setting-item">
                     <span style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
