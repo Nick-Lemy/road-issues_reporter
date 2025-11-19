@@ -93,7 +93,7 @@ function Leaderboard() {
 
                             <div className="user-info">
                                 <div className="user-name">
-                                    {user.displayName}
+                                    {isAdmin() ? user.displayName : (user.displayName?.split(' ')[0] || user.displayName)}
                                     {isCurrentUserRow && <span className="you-badge">You</span>}
                                 </div>
                                 {isAdmin() && (
