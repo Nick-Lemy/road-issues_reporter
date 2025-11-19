@@ -6,6 +6,7 @@ import SplashScreen from './components/SplashScreen'
 import BottomNav from './components/BottomNav'
 import BottomSheet from './components/BottomSheet'
 import Leaderboard from './components/Leaderboard'
+import Profile from './components/Profile'
 import { getFavorites, saveFavorite, deleteFavorite } from './utils/favoritesStorage'
 import IssueReportModal from './components/IssueReportModal'
 import IssuesList from './components/IssuesList'
@@ -514,161 +515,19 @@ function AppContent() {
 
           {/* PROFILE TAB */}
           {activeTab === 'profile' && (
-            <div className="tab-content">
-              <div className="profile-section">
-                <div className="profile-card">
-                  <div className="profile-avatar">
-                    <MapPin size={48} />
-                  </div>
-                  <h3>{currentUser.displayName || 'User'}</h3>
-                  <p className="profile-subtitle">{currentUser.email}</p>
-                  {isAdmin() && (
-                    <div style={{
-                      marginTop: '8px',
-                      padding: '4px 12px',
-                      background: '#fbbf24',
-                      color: '#78350f',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: '600'
-                    }}>
-                      ADMIN
-                    </div>
-                  )}
-                </div>
-
-                <div className="stats-grid">
-                  <div className="stat-card">
-                    <div className="stat-number">{userPoints.points}</div>
-                    <div className="stat-label">Points</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-number">{userReports.length}</div>
-                    <div className="stat-label">{t('yourReports', language)}</div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-number">{favorites.length}</div>
-                    <div className="stat-label">{t('favorite', language)}</div>
-                  </div>
-                </div>
-
-                {isAdmin() && (
-                  <button
-                    onClick={() => setActiveTab('admin')}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      background: '#0098a3',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      marginBottom: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px'
-                    }}
-                  >
-                    <Shield size={20} />
-                    Admin Panel
-                  </button>
-                )}
-
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    background: '#ef4444',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    marginBottom: '16px'
-                  }}
-                >
-                  Sign Out
-                </button>
-
-                <div className="settings-section">
-                  <h3 className="section-title">Settings</h3>
-
-                  <div className="setting-item">
-                    <span style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-                      {darkMode ? <Moon size={20} /> : <Sun size={20} />}
-                      <p>Dark Mode</p>
-                    </span>
-                    <button
-                      onClick={() => setDarkMode(!darkMode)}
-                      style={{
-                        padding: '6px 12px',
-                        background: darkMode ? '#10b981' : '#6b7280',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {darkMode ? 'Enabled ✓' : 'Disabled'}
-                    </button>
-                  </div>
-
-                  <div className="setting-item">
-                    <span style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-                      <BellIcon />
-                      <p>
-                        Traffic Notifications
-                      </p>
-                    </span>
-                    <button
-                      onClick={async () => {
-                        if (notificationsEnabled) {
-                          alert('Notifications are enabled. To disable, go to browser settings.');
-                        } else {
-                          const permission = await requestNotificationPermission();
-                          if (permission === 'granted') {
-                            setNotificationsEnabled(true);
-                            showNotification('Notifications Enabled', {
-                              body: 'You\'ll receive traffic alerts for your saved routes'
-                            });
-                          }
-                        }
-                      }}
-                      style={{
-                        padding: '6px 12px',
-                        background: notificationsEnabled ? '#10b981' : '#6b7280',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {notificationsEnabled ? 'Enabled ✓' : 'Disabled'}
-                    </button>
-                  </div>
-
-                  <div className="setting-item">
-                    <span>Language</span>
-                    <select
-                      value={language}
-                      onChange={(e) => setLanguage(e.target.value)}
-                      className="language-select"
-                    >
-                      <option value="English">English</option>
-                      <option value="Kinyarwanda">Kinyarwanda</option>
-                      <option value="French">Français</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Profile
+              userReports={userReports}
+              favorites={favorites}
+              onAdminClick={() => setActiveTab('admin')}
+              onLogout={handleLogout}
+              darkMode={darkMode}
+              setDarkMode={setDarkMode}
+              language={language}
+              setLanguage={setLanguage}
+              notificationsEnabled={notificationsEnabled}
+              setNotificationsEnabled={setNotificationsEnabled}
+              t={t}
+            />
           )}
 
           {/* ADMIN TAB */}
