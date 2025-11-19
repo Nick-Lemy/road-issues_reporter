@@ -11,6 +11,8 @@ import { auth, db } from '../config/firebase';
 
 const AuthContext = createContext({});
 
+const SUPER_ADMIN_EMAIL = import.meta.env.VITE_SUPER_ADMIN_EMAIL;
+
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
@@ -59,6 +61,11 @@ export const AuthProvider = ({ children }) => {
         return userProfile?.role === 'admin';
     };
 
+    // Check if user is super admin
+    const isSuperAdmin = () => {
+        return currentUser?.email === SUPER_ADMIN_EMAIL;
+    };
+
     // Fetch user profile from Firestore
     const fetchUserProfile = async (uid) => {
         try {
@@ -92,6 +99,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         isAdmin,
+        isSuperAdmin,
         loading,
     };
 
