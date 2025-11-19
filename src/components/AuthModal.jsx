@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { X, Mail, Lock, User, AlertCircle, Phone } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function AuthModal({ isOpen, onClose }) {
@@ -7,6 +7,7 @@ export default function AuthModal({ isOpen, onClose }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [displayName, setDisplayName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { login, signup } = useAuth();
@@ -25,7 +26,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     setLoading(false);
                     return;
                 }
-                await signup(email, password, displayName);
+                await signup(email, password, displayName, phoneNumber);
             }
             onClose();
         } catch (err) {
@@ -93,6 +94,28 @@ export default function AuthModal({ isOpen, onClose }) {
                                 onChange={(e) => setDisplayName(e.target.value)}
                                 required={!isLogin}
                                 placeholder="Enter your name"
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #d1d5db',
+                                    fontSize: '14px'
+                                }}
+                            />
+                        </div>
+                    )}
+
+                    {!isLogin && (
+                        <div className="form-group">
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                <Phone size={18} />
+                                Phone Number
+                            </label>
+                            <input
+                                type="tel"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                placeholder="Enter your phone number (optional)"
                                 style={{
                                     width: '100%',
                                     padding: '12px',

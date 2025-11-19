@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getLeaderboard } from '../services/pointsService';
 import { useAuth } from '../contexts/AuthContext';
-import { Crown, Trophy, Medal } from 'lucide-react';
+import { Crown, Trophy, Medal, Phone } from 'lucide-react';
 
 function Leaderboard() {
     const [leaderboard, setLeaderboard] = useState([]);
@@ -98,6 +98,12 @@ function Leaderboard() {
                                 </div>
                                 {isAdmin() && (
                                     <div className="user-email">{user.email}</div>
+                                )}
+                                {isAdmin() && user.phoneNumber && (
+                                    <div className="user-phone" style={{ fontSize: '12px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                                        {/* <Phone size={12} /> */}
+                                        {user.phoneNumber}
+                                    </div>
                                 )}
                             </div>
 

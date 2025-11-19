@@ -82,6 +82,7 @@ export const getLeaderboard = async (limitCount = 50) => {
                     userId: pointsData.userId,
                     displayName: userData.displayName || 'Anonymous',
                     email: userData.email,
+                    phoneNumber: userData.phoneNumber || '',
                     points: pointsData.points || 0,
                     issuesReported: pointsData.issuesReported || 0
                 });

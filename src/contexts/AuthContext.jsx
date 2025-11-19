@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     // Sign up new user
-    const signup = async (email, password, displayName) => {
+    const signup = async (email, password, displayName, phoneNumber = '') => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
         await setDoc(doc(db, 'users', user.uid), {
             email: user.email,
             displayName: displayName,
+            phoneNumber: phoneNumber || '',
             role: 'user', // Default role
             createdAt: new Date().toISOString(),
         });
