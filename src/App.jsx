@@ -237,7 +237,7 @@ function AppContent() {
       // Award points to user for reporting
       await awardPointsForIssue(currentUser.uid)
 
-      // Reload user points
+      // Reload user point
       const updatedPoints = await getUserPoints(currentUser.uid)
       setUserPoints(updatedPoints)
 
