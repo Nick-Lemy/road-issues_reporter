@@ -26,6 +26,11 @@ export default function LoginPage() {
                     setLoading(false);
                     return;
                 }
+                if (!phoneNumber.trim()) {
+                    setError('Please enter your phone number');
+                    setLoading(false);
+                    return;
+                }
                 await signup(email, password, displayName, phoneNumber);
             }
             // No need to do anything - the auth state change will be handled by AuthContext
@@ -194,13 +199,14 @@ export default function LoginPage() {
                                     fontWeight: '500',
                                     color: '#4b5563'
                                 }}>
-                                    Phone Number
+                                    Phone Number *
                                 </label>
                                 <input
                                     type="tel"
                                     value={phoneNumber}
                                     onChange={(e) => setPhoneNumber(e.target.value)}
-                                    placeholder="Enter your phone number (optional)"
+                                    required={!isLogin}
+                                    placeholder="Enter your phone number"
                                     style={{
                                         width: '100%',
                                         padding: '10px 12px',

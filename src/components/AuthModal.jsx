@@ -26,6 +26,11 @@ export default function AuthModal({ isOpen, onClose }) {
                     setLoading(false);
                     return;
                 }
+                if (!phoneNumber.trim()) {
+                    setError('Please enter your phone number');
+                    setLoading(false);
+                    return;
+                }
                 await signup(email, password, displayName, phoneNumber);
             }
             onClose();
@@ -109,13 +114,14 @@ export default function AuthModal({ isOpen, onClose }) {
                         <div className="form-group">
                             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                                 <Phone size={18} />
-                                Phone Number
+                                Phone Number *
                             </label>
                             <input
                                 type="tel"
                                 value={phoneNumber}
                                 onChange={(e) => setPhoneNumber(e.target.value)}
-                                placeholder="Enter your phone number (optional)"
+                                required={!isLogin}
+                                placeholder="Enter your phone number"
                                 style={{
                                     width: '100%',
                                     padding: '12px',
