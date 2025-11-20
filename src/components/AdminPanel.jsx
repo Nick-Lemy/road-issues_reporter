@@ -19,11 +19,6 @@ export default function AdminPanel({ onClose }) {
     const { isAdmin, currentUser } = useAuth();
 
     const isSuperAdmin = () => {
-        console.log('Checking super admin:', {
-            currentEmail: currentUser?.email,
-            superAdminEmail: SUPER_ADMIN_EMAIL,
-            match: currentUser?.email === SUPER_ADMIN_EMAIL
-        });
         return currentUser?.email === SUPER_ADMIN_EMAIL;
     };
 
@@ -200,10 +195,6 @@ export default function AdminPanel({ onClose }) {
                         </h2>
                         <p style={{ margin: '4px 0 0 0', fontSize: '14px', opacity: 0.9 }}>
                             {isSuperAdmin() ? '🌟 Super Admin Access' : 'Admin Access'}
-                        </p>
-                        {/* Debug info - remove after testing */}
-                        <p style={{ margin: '4px 0 0 0', fontSize: '12px', opacity: 0.7, fontFamily: 'monospace' }}>
-                            Current: {currentUser?.email || 'Not logged in'}
                         </p>
                     </div>
                 </div>

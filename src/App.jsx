@@ -299,6 +299,7 @@ function AppContent() {
       {/* Full Screen Map - Visible only on home and report tabs */}
       {(activeTab === 'home' || activeTab === 'report') && (
         <Map
+          key={activeTab} // Force remount when switching between home and report
           onIssueSelect={handleIssueClick}
           reportingMode={reportingMode || activeTab === 'report'}
           onReportRouteSelect={handleReportRouteSelect}

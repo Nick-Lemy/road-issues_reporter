@@ -28,7 +28,8 @@ function Map({
     refreshReports,
     focusIssue,  // New prop to focus on a specific issue
     selectedPlace,
-    onRouteCreated
+    onRouteCreated,
+    clearRouteOnMount = false  // New prop to clear route when component mounts
 }) {
     const mapRef = useRef(null)
     const mapInstanceRef = useRef(null)
@@ -841,6 +842,77 @@ function Map({
             }
         };
     }, [routingMode, routePoints, reportingMode, reportPoints, reportCategory, onReportRouteSelect])
+
+    // Clear route and routing state when component remounts or when user leaves report/routing mode
+    useEffect(() => {
+        return () => {
+            // Cleanup when component unmounts - clear all routing
+            if (routingControlRef.current && mapInstanceRef.current) {
+                try {
+                    mapInstanceRef.current.removeControl(routingControlRef.current);
+                } catch (e) {
+                    // Ignore errors if map is already destroyed
+                }
+                routingControlRef.current = null;
+            }
+            
+            // Clear all markers
+            routeMarkersRef.current.forEach(marker => {
+                try {
+                    if (marker && marker.remove) marker.remove();
+                } catch (e) {
+                    // Ignore errors
+                }
+            });
+            routeMarkersRef.current = [];
+            
+            // Clear preview line
+            if (previewLineRef.current && previewLineRef.current.remove) {
+                try {
+                    previewLineRef.current.remove();
+                } catch (e) {
+                    // Ignore errors
+                }
+                previewLineRef.current = null;
+            }
+        };
+    }, []);
+
+    // Clear route when navigating away from map or when reportingMode/routingMode is disabled
+    useEffect(() => {
+        // If both modes are disabled, ensure everything is cleared
+        if (!reportingMode && !routingMode) {
+            // Clear routing control if it exists
+            if (routingControlRef.current && mapInstanceRef.current) {
+                mapInstanceRef.current.removeControl(routingControlRef.current);
+                routingControlRef.current = null;
+            }
+            
+            // Clear route markers
+            if (routeMarkersRef.current.length > 0) {
+                routeMarkersRef.current.forEach(marker => {
+                    if (marker && marker.remove) marker.remove();
+                });
+                routeMarkersRef.current = [];
+            }
+            
+            // Clear report points
+            if (reportPoints.length > 0) {
+                setReportPoints([]);
+            }
+            
+            // Clear route points
+            if (routePoints.length > 0) {
+                setRoutePoints([]);
+            }
+            
+            // Clear preview line
+            if (previewLineRef.current && previewLineRef.current.remove) {
+                previewLineRef.current.remove();
+                previewLineRef.current = null;
+            }
+        }
+    }, [reportingMode, routingMode]);
 
     const toggleRoutingMode = () => {
         // If route already exists, don't allow toggling routing mode
